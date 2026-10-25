@@ -27,6 +27,9 @@ macros/
 The quickest start is to copy [`template/my-macro/`](template/my-macro/),
 rename the folder and the `.lua` file, and fill them in.
 
+If you don't use git, [Sharing a macro with the GitHub website](docs/github-website-guide.md)
+shows how to submit and update a macro entirely in the browser.
+
 ## The header
 
 The first comment lines of the macro file are its header. All of these are
