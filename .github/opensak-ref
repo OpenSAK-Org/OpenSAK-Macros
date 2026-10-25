@@ -1,0 +1,5 @@
+# The OpenSAK commit whose src/opensak/macro/metadata.py the checks use to
+# parse macro headers. Change it deliberately when the header rules change
+# in OpenSAK (see MAINTAINERS.md). The first line without "#" is used.
+# OpenSAK v1.22.0-beta.9
+7f2bf6daafb91aee9357c9b5363655af8424a4fc

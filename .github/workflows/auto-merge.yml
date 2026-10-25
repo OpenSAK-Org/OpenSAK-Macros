@@ -1,0 +1,106 @@
+# Merges an owner's update of their own macro without a maintainer, when it
+# passes the checks and declares nothing new (see CONTRIBUTING.md).
+#
+# Runs on pull_request_target, so this file and the scripts always come from
+# main — a pull request can't change the rules it is judged by. The pull
+# request's files are only read as data (git objects); its code is never
+# checked out or run. The Lua syntax check compiles without executing.
+#
+# An eligible pull request gets GitHub's auto-merge, so GitHub merges it as
+# soon as the required checks ("Check macro", "Test checker") are green. Any
+# other pull request has auto-merge turned off and waits for a maintainer.
+# GitHub itself turns auto-merge off whenever someone without write access
+# pushes new commits; this workflow then decides again for the new commits.
+#
+# Needs: Settings → General → "Allow auto-merge", and the labels
+# "auto-merge" and "needs review".
+
+name: Auto-merge
+
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize, ready_for_review]
+    branches: [main]
+
+permissions: {}
+
+concurrency:
+  group: auto-merge-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  decide:
+    name: Auto-merge decision
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    env:
+      PR: ${{ github.event.pull_request.number }}
+      HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+      AUTHOR: ${{ github.event.pull_request.user.login }}
+      DRAFT: ${{ github.event.pull_request.draft }}
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Check out main (never the pull request's code)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Fetch the pull request's commits as data
+        id: fetch
+        run: |
+          git fetch --no-tags origin "+refs/pull/${PR}/head:refs/remotes/pr/head"
+          if [ "$(git rev-parse refs/remotes/pr/head)" = "$HEAD_SHA" ]; then
+            echo "current=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::The pull request has newer commits; the run for those decides."
+          fi
+
+      - uses: actions/setup-python@v5
+        if: steps.fetch.outputs.current == 'true'
+        with:
+          python-version: "3.12"
+
+      - name: Install Lua compiler and get OpenSAK header parser
+        if: steps.fetch.outputs.current == 'true'
+        run: |
+          pip install "lupa>=2.0,<3"
+          ref=$(grep -v '^#' .github/opensak-ref | head -n 1 | tr -d '[:space:]')
+          mkdir -p "$RUNNER_TEMP/tools"
+          curl -fsSL -o "$RUNNER_TEMP/tools/macro_metadata.py" \
+            "https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK/${ref}/src/opensak/macro/metadata.py"
+
+      - name: Check the pull request
+        if: steps.fetch.outputs.current == 'true'
+        run: |
+          python -I scripts/check_macro_pr.py \
+            --repo . --base "$(git rev-parse HEAD)" --head "$HEAD_SHA" \
+            --metadata "$RUNNER_TEMP/tools/macro_metadata.py" \
+            --json "$RUNNER_TEMP/check.json" || true
+
+      - name: Decide
+        id: decide
+        if: steps.fetch.outputs.current == 'true'
+        run: |
+          python -I scripts/auto_merge_decision.py \
+            --check "$RUNNER_TEMP/check.json" \
+            --owners .github/macro-owners.json \
+            --author "$AUTHOR" --draft "$DRAFT"
+
+      - name: Turn on auto-merge
+        if: steps.decide.outputs.eligible == 'true'
+        run: |
+          gh pr merge "$PR" --auto --merge
+          gh pr edit "$PR" --add-label "auto-merge"
+          gh pr edit "$PR" --remove-label "needs review" || true
+
+      - name: Leave it for a maintainer
+        if: steps.fetch.outputs.current == 'true' && steps.decide.outputs.eligible != 'true'
+        run: |
+          gh pr merge "$PR" --disable-auto 2>/dev/null || true
+          gh pr edit "$PR" --add-label "needs review"
+          gh pr edit "$PR" --remove-label "auto-merge" || true
