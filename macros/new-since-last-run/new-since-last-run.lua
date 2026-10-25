@@ -1,10 +1,10 @@
 -- OpenSAK Macro
 -- Name: New since last run
 -- Author: nagisml
--- Version: 1.01
+-- Version: 1.02
 -- Requires-API: 3
 -- Description: Show the unfound caches updated since the last run
--- Permissions: none
+-- Permissions: write
 --
 -- Remembers when it last ran (opensak.settings), and filters the caches
 -- that a GPX or pocket query import has added or updated since then — the
