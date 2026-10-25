@@ -59,9 +59,12 @@ declare, don't approve it, and please report it (see below).
 
 ## Problems with a macro?
 
-Open an issue with the **Macro problem** template and include the macro name,
-the macro version and your OpenSAK version. Problems with OpenSAK itself
-belong in the [OpenSAK repository](https://github.com/OpenSAK-Org/OpenSAK/issues).
+- **A macro from this repository** doesn't work or does something unexpected:
+  open an issue **here**, in
+  [OpenSAK-Macros → Issues → New issue → Macro problem](https://github.com/OpenSAK-Org/OpenSAK-Macros/issues/new/choose),
+  and include the macro name, the macro version and your OpenSAK version.
+- **OpenSAK itself** (the app, not a specific macro): report it in the main
+  [OpenSAK repository](https://github.com/OpenSAK-Org/OpenSAK/issues) instead.
 
 Ideas, questions and requests for new macros are welcome in
 [Discussions](https://github.com/OpenSAK-Org/OpenSAK-Macros/discussions).
@@ -70,6 +73,9 @@ Ideas, questions and requests for new macros are welcome in
 
 See [CONTRIBUTING.md](CONTRIBUTING.md). In short: copy [`template/`](template/),
 fill in the header and the README, and open a pull request.
+
+Never used git? [Sharing a macro with the GitHub website](docs/github-website-guide.md)
+walks you through it step by step, in the browser only.
 
 ## License
 
