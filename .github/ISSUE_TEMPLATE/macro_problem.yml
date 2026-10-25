@@ -1,0 +1,62 @@
+name: Macro problem
+description: A macro from this repository doesn't work, or does something unexpected.
+labels: ["macro problem"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! Problems with OpenSAK itself (not a specific macro)
+        belong in the [OpenSAK repository](https://github.com/OpenSAK-Org/OpenSAK/issues).
+  - type: input
+    id: macro-name
+    attributes:
+      label: Macro name
+      description: The folder name under macros/, or the Name from the macro header.
+      placeholder: find-easy-traditionals
+    validations:
+      required: true
+  - type: input
+    id: macro-version
+    attributes:
+      label: Macro version
+      description: The Version from the macro header (also shown in the Macro manager).
+      placeholder: "1.0"
+    validations:
+      required: true
+  - type: input
+    id: opensak-version
+    attributes:
+      label: OpenSAK version
+      description: Shown in Help → About.
+      placeholder: 1.22.0-beta.1
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      options:
+        - Windows
+        - macOS
+        - Linux
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: error
+    attributes:
+      label: Error message or macro output
+      description: Copy the error message or the output from the Macro manager, if any.
+      render: text
+  - type: checkboxes
+    id: declarations
+    attributes:
+      label: Undeclared access
+      options:
+        - label: The macro asked for access (write, folder or web site) that its header doesn't declare.

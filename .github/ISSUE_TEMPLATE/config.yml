@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Idea, question or macro request
+    url: https://github.com/OpenSAK-Org/OpenSAK-Macros/discussions
+    about: Ask questions, share ideas and request new macros in Discussions.
+  - name: Problem with OpenSAK itself
+    url: https://github.com/OpenSAK-Org/OpenSAK/issues
+    about: Report bugs in the OpenSAK app in the main repository.
