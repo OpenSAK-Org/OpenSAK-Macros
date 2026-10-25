@@ -1,7 +1,7 @@
 -- OpenSAK Macro
 -- Name: New since last run
 -- Author: nagisml
--- Version: 1.0
+-- Version: 1.01
 -- Requires-API: 3
 -- Description: Show the unfound caches updated since the last run
 -- Permissions: none
@@ -17,7 +17,7 @@
 -- restarts; set RESET to true for one run to start over.
 
 local RESET = false
-local RUNS_KEPT = 5
+local RUNS_KEPT = 10
 
 if RESET then
     opensak.settings.clear()

@@ -20,7 +20,7 @@ last runs in its own macro settings, which OpenSAK keeps across restarts.
 3. Run the macro again. It filters the unfound caches updated since the
    previous run (the filter is labelled "New since … UTC") and prints how
    many there are.
-4. Each run also lists the last 5 runs with their time and count.
+4. Each run also lists the last 10 runs with their time and count.
 
 Times are in UTC, like the import time OpenSAK stores for each cache.
 
@@ -30,4 +30,5 @@ and set it back to `false`. To keep more or fewer runs in the list, change
 
 ## Changes
 
+- 1.01 — lists the last 10 runs instead of 5
 - 1.0 — first version
