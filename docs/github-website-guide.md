@@ -80,18 +80,32 @@ only do this once; bookmark it.
 
 ### Step 4: Open the pull request
 
-GitHub now shows **Open a pull request**.
+> ⚠️ **The pull request must go to `OpenSAK-Org/OpenSAK-Macros`, not to
+> your own fork.** After "Propose changes", GitHub often opens a page that
+> compares branches *inside your fork*. A pull request created there never
+> reaches the maintainers.
 
-> ⚠️ **Check the top line before anything else.** GitHub often suggests
-> your own fork as the target. It must say:
->
+The easiest way to get it right:
+
+1. Open <https://github.com/OpenSAK-Org/OpenSAK-Macros> (the original, not
+   your fork).
+2. A yellow banner says *"add-find-easy-traditionals had recent pushes"*.
+   Click **Compare & pull request** in it. This page already points to the
+   right place.
+
+Or, on the page GitHub opened after "Propose changes":
+
+1. Look at the top line. If it only shows `base: main ← compare: …` (no
+   "base repository"), click the link **compare across forks** just above it.
+2. Set **base repository** to `OpenSAK-Org/OpenSAK-Macros`.
+
+Either way, check the top line before you continue. It must say:
+
 > **base repository: `OpenSAK-Org/OpenSAK-Macros`** · base: `main` ←
 > head repository: `<your-name>/OpenSAK-Macros` · compare:
 > `add-find-easy-traditionals`
->
-> If the base repository is your own fork, click it and choose
-> `OpenSAK-Org/OpenSAK-Macros`. A pull request into your own fork never
-> reaches the maintainers.
+
+Then:
 
 1. Title: for example `New macro: Find easy traditionals`.
 2. Description: one or two sentences on what the macro does, and anything the
@@ -165,8 +179,16 @@ This makes sure you're editing the version that is published now.
 
 ### Step 4: Open the pull request
 
-Same as Guide 1, Step 4 — **check the base repository**. Title, for example:
-`Update find-easy-traditionals to 1.1`. Briefly say what changed.
+Same as [Guide 1, Step 4](#step-4-open-the-pull-request). This matters even
+more for updates: after "Propose changes" in your fork, GitHub nearly always
+compares branches inside your fork, without a "base repository" choice. Use
+the **Compare & pull request** banner on
+<https://github.com/OpenSAK-Org/OpenSAK-Macros>, or click
+**compare across forks** and set the base repository to
+`OpenSAK-Org/OpenSAK-Macros`.
+
+Title, for example: `Update find-easy-traditionals to 1.1`. Briefly say what
+changed.
 
 ### Step 5: Checks and merging
 
