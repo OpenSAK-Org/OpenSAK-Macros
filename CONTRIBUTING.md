@@ -87,14 +87,24 @@ match what the code does, and that nothing in it is harmful.
 
 **An update to your own macro** is merged automatically when the checks are
 green and the update doesn't declare anything new — no new permission and no
-new host. The GitHub account that opened the pull request adding the macro is
-its owner.
+new host. The GitHub account that opened the pull request adding the macro
+becomes its owner; a maintainer records this in `.github/macro-owners.json`
+when the macro is merged. You can't add yourself there in your own pull
+request.
 
 **An update that declares more** (a new permission or a new host), or a
 change to someone else's macro, is reviewed by a maintainer.
 
 If you want to improve someone else's macro, it's good practice to talk to the
 owner first in an issue or in Discussions.
+
+## No GitHub account?
+
+Post your macro in the OpenSAK Facebook group or in the OpenSAK thread on
+the GSAK forum, and a maintainer can submit it for you. Your name (for
+example your geocaching name) goes in the `Author` line. A macro submitted
+this way has no GitHub owner, so every later update is reviewed by a
+maintainer too.
 
 ## Bumping the version
 

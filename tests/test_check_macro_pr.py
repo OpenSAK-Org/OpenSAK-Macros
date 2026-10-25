@@ -3,13 +3,13 @@ Tests for scripts/check_macro_pr.py.
 
 They need OpenSAK's header parser. In CI the workflow downloads it; locally:
 
+    ref=$(grep -v '^#' .github/opensak-ref | head -n 1)
     mkdir -p .tools && curl -fsSL -o .tools/macro_metadata.py \
-      https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK/<OPENSAK_REF>/src/opensak/macro/metadata.py
+      https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK/$ref/src/opensak/macro/metadata.py
     pip install "lupa>=2.0,<3" pytest
     pytest -v tests/
 
-(<OPENSAK_REF> is the commit in .github/workflows/check.yml.) Set
-MACRO_METADATA to use a parser somewhere else.
+Set MACRO_METADATA to use a parser somewhere else.
 """
 
 from __future__ import annotations

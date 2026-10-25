@@ -3,16 +3,15 @@
 # "Check macro" runs scripts/check_macro_pr.py on the macro folder the pull
 # request changes. The script is taken from main, not from the pull request,
 # so a macro pull request can't loosen the rules it is checked against.
-# (The pull request can still edit this workflow file itself; that is why the
-# auto-merge workflow re-checks from main and only ever merges pull requests
+# (The pull request can still edit this workflow file itself; that is why
+# auto-merge.yml checks again from main and only ever merges pull requests
 # that change nothing outside their own macro folder.)
 #
-# "Test checker" runs the checker's own tests with the pull request's
-# version of the script, for pull requests that change the checker.
+# "Test checker" runs the tests with the pull request's version of the
+# scripts, for pull requests that change them.
 #
 # The header parser is OpenSAK's src/opensak/macro/metadata.py, downloaded
-# from a pinned commit. Bump OPENSAK_REF deliberately when the macro header
-# rules change in OpenSAK; until then the rules here stay put.
+# from the commit in .github/opensak-ref.
 
 name: Check
 
@@ -28,9 +27,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  # OpenSAK v1.22.0-beta.9
-  OPENSAK_REF: 7f2bf6daafb91aee9357c9b5363655af8424a4fc
   LUPA: "lupa>=2.0,<3"
+  PARSER_URL: https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK/%s/src/opensak/macro/metadata.py
 
 jobs:
   check-macro:
@@ -54,14 +52,10 @@ jobs:
           BASE: ${{ github.event.pull_request.base.sha }}
         run: |
           mkdir -p "$RUNNER_TEMP/tools"
-          if git cat-file -e "$BASE:scripts/check_macro_pr.py" 2>/dev/null; then
-            git show "$BASE:scripts/check_macro_pr.py" > "$RUNNER_TEMP/tools/check_macro_pr.py"
-          else
-            echo "::notice::main has no checker yet; using the pull request's version."
-            cp scripts/check_macro_pr.py "$RUNNER_TEMP/tools/check_macro_pr.py"
-          fi
-          curl -fsSL -o "$RUNNER_TEMP/tools/macro_metadata.py" \
-            "https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK/${OPENSAK_REF}/src/opensak/macro/metadata.py"
+          from_main() { git show "$BASE:$1" 2>/dev/null || cat "$1"; }
+          from_main scripts/check_macro_pr.py > "$RUNNER_TEMP/tools/check_macro_pr.py"
+          ref=$(from_main .github/opensak-ref | grep -v '^#' | head -n 1 | tr -d '[:space:]')
+          curl -fsSL -o "$RUNNER_TEMP/tools/macro_metadata.py" "$(printf "$PARSER_URL" "$ref")"
 
       - name: Check macro
         env:
@@ -70,17 +64,7 @@ jobs:
         run: |
           python -I "$RUNNER_TEMP/tools/check_macro_pr.py" \
             --repo . --base "$BASE" --head "$HEAD" \
-            --metadata "$RUNNER_TEMP/tools/macro_metadata.py" \
-            --json "$RUNNER_TEMP/macro-check.json"
-
-      - name: Save result
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: macro-check
-          path: ${{ runner.temp }}/macro-check.json
-          if-no-files-found: ignore
-          retention-days: 7
+            --metadata "$RUNNER_TEMP/tools/macro_metadata.py"
 
   test-checker:
     name: Test checker
@@ -100,8 +84,8 @@ jobs:
       - name: Get OpenSAK header parser
         run: |
           mkdir -p .tools
-          curl -fsSL -o .tools/macro_metadata.py \
-            "https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK/${OPENSAK_REF}/src/opensak/macro/metadata.py"
+          ref=$(grep -v '^#' .github/opensak-ref | head -n 1 | tr -d '[:space:]')
+          curl -fsSL -o .tools/macro_metadata.py "$(printf "$PARSER_URL" "$ref")"
 
       - name: Run tests
         run: pytest -v tests/
