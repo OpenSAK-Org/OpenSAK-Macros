@@ -1,3 +1,4 @@
 {
-  "new-since-last-run": ["nagisml"]
+  "new-since-last-run": ["nagisml"],
+  "optimize-pqs": ["dstein766"]
 }
