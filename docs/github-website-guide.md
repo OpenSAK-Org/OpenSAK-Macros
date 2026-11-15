@@ -66,12 +66,21 @@ only do this once; bookmark it.
 
 ### Step 3: Upload your macro folder to your fork
 
-1. In **your fork**, open the `macros` folder.
+1. In **your fork**, open the `macros` folder. The path at the top of the
+   page now reads `OpenSAK-Macros / macros /`.
 2. Click **Add file → Upload files**.
 3. Drag your **whole macro folder** into the upload area, not just the files
    inside it. GitHub keeps the folder structure.
-4. Check the file list: the paths must look like
-   `macros/find-easy-traditionals/...`.
+4. Check the file list. GitHub shows the paths *relative to the `macros`
+   folder you are in*, so they look like
+   `find-easy-traditionals/find-easy-traditionals.lua` and
+   `find-easy-traditionals/README.md`, without `macros/` in front. That is
+   correct: the files end up in `macros/find-easy-traditionals/`.
+
+   > ⚠️ Don't drag in the repository's `macros` folder itself or a folder
+   > that contains one, and never delete other people's files from the
+   > list. If anything in the list starts with `macros/`, or files you
+   > didn't add show up, click **Cancel** and start this step again.
 5. Under **Commit changes**:
    - Message: for example `Add find-easy-traditionals`.
    - Select **Create a new branch for this commit and start a pull request**,
