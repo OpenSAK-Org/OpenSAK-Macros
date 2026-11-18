@@ -11,7 +11,7 @@ GSAK's with a few small differences) and fills only the columns GCDroid uses.
 
 ## What it needs
 
-- OpenSAK with macro API version 3 or newer
+- OpenSAK with macro API version 4 or newer
 - Permissions: `write-files`
 
 The export is the macro's own database (`opensak.macro_db()`), a file

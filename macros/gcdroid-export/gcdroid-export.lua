@@ -2,7 +2,7 @@
 -- Name: Export to GCDroid
 -- Author: nagisml
 -- Version: 1.0
--- Requires-API: 3
+-- Requires-API: 4
 -- Description: Writes the active database as a GCDroid database (GSAK's sqlite.db3 layout) with only what GCDroid reads
 -- Permissions: write-files
 -- Headless: yes
