@@ -101,6 +101,30 @@ change to someone else's macro, is reviewed by a maintainer.
 If you want to improve someone else's macro, it's good practice to talk to the
 owner first in an issue or in Discussions.
 
+## Porting a GSAK macro
+
+Many good OpenSAK macros will start life as a GSAK macro. Macros posted in the
+GSAK macro library are public domain, so porting them is allowed — but the
+GSAK community has always asked the original author and given them credit, and
+we follow that tradition here:
+
+1. **Ask the original author first**, where possible (GSAK forum, Facebook,
+   e-mail). Some authors have already given permission for all their macros —
+   see [GSAK authors' permissions](docs/gsak-author-permissions.md).
+   If you can't reach the author, say so in your pull request.
+2. **Credit the original author(s) in the macro's README**, with a line like:
+
+   > This is a port of the GSAK macro *PlacedPQ*, originally written by
+   > Lil Devil, Kai Team, lignumaqua and Clyde.
+
+   Link to the original macro on the GSAK forum if you can. A comment line in
+   the `.lua` header is a nice extra, but the README is where credit belongs.
+3. **`Author` is you** — the person who wrote the OpenSAK version and will
+   maintain it.
+
+Your port is published under the MIT License like everything else in this
+repository.
+
 ## No GitHub account?
 
 Post your macro in the OpenSAK Facebook group or in the OpenSAK thread on
@@ -118,4 +142,5 @@ README or example files doesn't — but if in doubt, bump it.
 
 By opening a pull request you agree that your contribution is published under
 the repository's [MIT License](LICENSE). Only submit code you wrote yourself or
-are allowed to publish under that license.
+are allowed to publish under that license. For ports of GSAK macros, see
+[Porting a GSAK macro](#porting-a-gsak-macro).
