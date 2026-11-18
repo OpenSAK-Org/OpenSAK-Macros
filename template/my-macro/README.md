@@ -2,6 +2,10 @@
 
 One or two sentences: what the macro does and why it's useful.
 
+If this is a port of a GSAK macro, credit the original author(s) here, e.g.
+"This is a port of the GSAK macro *Name*, originally written by Author."
+Otherwise delete this paragraph.
+
 ## What it needs
 
 - OpenSAK with macro API version 3 or newer
