@@ -14,7 +14,8 @@ Opens .html page in your default browser upon completion.
 
 ## How to use it
 
-1. Run the macro from **Macros → Macro manager…**.
+1. Set a filter to show (only) the caches to be printed to the roadsheet.
+2. Run the macro from **Macros → Macro manager…**.
 
 ## Example
 
