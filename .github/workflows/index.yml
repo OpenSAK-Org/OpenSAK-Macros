@@ -27,9 +27,11 @@ concurrency:
 
 env:
   INDEX_BRANCH: index
-  # metadata.py imports deprecation.py (from v1.22.0); both are needed.
   PARSER_URL: https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK/%s/src/opensak/macro
-  PARSER_FILES: metadata.py deprecation.py
+  # The modules metadata.py imports (deprecation.py from v1.22.0). An older
+  # ref doesn't have them and doesn't need them; if one is missing that is
+  # needed, loading the parser fails with ModuleNotFoundError.
+  PARSER_DEPS: deprecation.py
 
 jobs:
   index:
@@ -51,9 +53,12 @@ jobs:
       - name: Get OpenSAK header parser
         run: |
           ref=$(grep -v '^#' .github/opensak-ref | head -n 1 | tr -d '[:space:]')
-          mkdir -p "$RUNNER_TEMP/opensak-src/opensak/macro"
-          for f in $PARSER_FILES; do
-            curl -fsSL -o "$RUNNER_TEMP/opensak-src/opensak/macro/$f" "$(printf "$PARSER_URL" "$ref")/$f"
+          dir="$RUNNER_TEMP/opensak-src/opensak/macro"
+          url="$(printf "$PARSER_URL" "$ref")"
+          mkdir -p "$dir"
+          curl -fsSL -o "$dir/metadata.py" "$url/metadata.py"
+          for f in $PARSER_DEPS; do
+            curl -fsSL -o "$dir/$f" "$url/$f" || echo "::notice::No $f at $ref (not needed there)"
           done
 
       - name: Build index.json

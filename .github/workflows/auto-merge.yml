@@ -70,16 +70,21 @@ jobs:
         run: |
           pip install "lupa>=2.0,<3"
           ref=$(grep -v '^#' .github/opensak-ref | head -n 1 | tr -d '[:space:]')
-          mkdir -p "$RUNNER_TEMP/tools"
-          curl -fsSL -o "$RUNNER_TEMP/tools/macro_metadata.py" \
-            "https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK/${ref}/src/opensak/macro/metadata.py"
+          dir="$RUNNER_TEMP/opensak-src/opensak/macro"
+          url="https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK/${ref}/src/opensak/macro"
+          mkdir -p "$dir"
+          curl -fsSL -o "$dir/metadata.py" "$url/metadata.py"
+          # metadata.py's imports, as PARSER_DEPS in check.yml
+          for f in deprecation.py; do
+            curl -fsSL -o "$dir/$f" "$url/$f" || echo "::notice::No $f at $ref (not needed there)"
+          done
 
       - name: Check the pull request
         if: steps.fetch.outputs.current == 'true'
         run: |
           python -I scripts/check_macro_pr.py \
             --repo . --base "$(git rev-parse HEAD)" --head "$HEAD_SHA" \
-            --metadata "$RUNNER_TEMP/tools/macro_metadata.py" \
+            --metadata "$RUNNER_TEMP/opensak-src/opensak/macro/metadata.py" \
             --json "$RUNNER_TEMP/check.json" || true
 
       - name: Decide

@@ -73,8 +73,8 @@ The checker also uses two internal helpers of the parser (`_header_lines`,
 `_KEY_LINE`) to see which keys are actually written. If "Test checker"
 fails after a bump, look there first. If it fails with `ModuleNotFoundError`,
 `metadata.py` has gained another top-level import: add that file to
-`PARSER_FILES` in `check.yml` and `index.yml` (and to the download in
-`tests/test_check_macro_pr.py`).
+`PARSER_DEPS` in `check.yml` and `index.yml`, to the list in
+`auto-merge.yml` and to the download in `tests/test_check_macro_pr.py`.
 
 ## The macro index
 
