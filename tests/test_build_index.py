@@ -21,7 +21,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 import build_index as bi
 
-METADATA = Path(os.environ.get("MACRO_METADATA", ROOT / ".tools" / "macro_metadata.py"))
+METADATA = Path(os.environ.get("MACRO_METADATA", ROOT / ".tools" / "opensak" / "macro" / "metadata.py"))
 if not METADATA.is_file():
     pytest.skip(f"OpenSAK header parser not found at {METADATA} (see "
                 "tests/test_check_macro_pr.py)", allow_module_level=True)

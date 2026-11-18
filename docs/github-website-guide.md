@@ -48,8 +48,9 @@ the GitHub website — no git, no command line. The rules themselves are in
      `read-files`, `write-files`, `open`, `run-macros`). If it only reads
      data, write `none`.
    - **Network:** add this line only if the macro contacts web sites. Give
-     plain host names such as `api.example.com`. `geocaching.com` and
-     `coord.info` are not allowed.
+     plain host names such as `api.example.com`. Geocaching HQ's sites
+     (`geocaching.com`, `coord.info`, `waymarking.com`, `wherigo.com` and
+     related domains) are not allowed.
 
 4. Write the `README.md`: what the macro does, how to use it, and what it
    needs.

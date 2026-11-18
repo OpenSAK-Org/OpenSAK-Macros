@@ -10,8 +10,9 @@
 # "Test checker" runs the tests with the pull request's version of the
 # scripts, for pull requests that change them.
 #
-# The header parser is OpenSAK's src/opensak/macro/metadata.py, downloaded
-# from the commit in .github/opensak-ref.
+# The header parser is OpenSAK's src/opensak/macro/metadata.py (with the
+# deprecation.py it imports), downloaded from the commit in
+# .github/opensak-ref into an opensak/macro/ folder.
 
 name: Check
 
@@ -28,7 +29,9 @@ concurrency:
 
 env:
   LUPA: "lupa>=2.0,<3"
-  PARSER_URL: https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK/%s/src/opensak/macro/metadata.py
+  # metadata.py imports deprecation.py (from v1.22.0); both are needed.
+  PARSER_URL: https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK/%s/src/opensak/macro
+  PARSER_FILES: metadata.py deprecation.py
 
 jobs:
   check-macro:
@@ -55,7 +58,10 @@ jobs:
           from_main() { git show "$BASE:$1" 2>/dev/null || cat "$1"; }
           from_main scripts/check_macro_pr.py > "$RUNNER_TEMP/tools/check_macro_pr.py"
           ref=$(from_main .github/opensak-ref | grep -v '^#' | head -n 1 | tr -d '[:space:]')
-          curl -fsSL -o "$RUNNER_TEMP/tools/macro_metadata.py" "$(printf "$PARSER_URL" "$ref")"
+          mkdir -p "$RUNNER_TEMP/opensak-src/opensak/macro"
+          for f in $PARSER_FILES; do
+            curl -fsSL -o "$RUNNER_TEMP/opensak-src/opensak/macro/$f" "$(printf "$PARSER_URL" "$ref")/$f"
+          done
 
       - name: Check macro
         env:
@@ -64,7 +70,7 @@ jobs:
         run: |
           python -I "$RUNNER_TEMP/tools/check_macro_pr.py" \
             --repo . --base "$BASE" --head "$HEAD" \
-            --metadata "$RUNNER_TEMP/tools/macro_metadata.py"
+            --metadata "$RUNNER_TEMP/opensak-src/opensak/macro/metadata.py"
 
   test-checker:
     name: Test checker
@@ -83,9 +89,11 @@ jobs:
 
       - name: Get OpenSAK header parser
         run: |
-          mkdir -p .tools
           ref=$(grep -v '^#' .github/opensak-ref | head -n 1 | tr -d '[:space:]')
-          curl -fsSL -o .tools/macro_metadata.py "$(printf "$PARSER_URL" "$ref")"
+          mkdir -p ".tools/opensak/macro"
+          for f in $PARSER_FILES; do
+            curl -fsSL -o ".tools/opensak/macro/$f" "$(printf "$PARSER_URL" "$ref")/$f"
+          done
 
       - name: Run tests
         run: pytest -v tests/

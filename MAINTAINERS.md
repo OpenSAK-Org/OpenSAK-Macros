@@ -57,7 +57,9 @@ the README explains why.
 ## Changing the header rules
 
 The checks parse headers with OpenSAK's `src/opensak/macro/metadata.py` from
-the commit in `.github/opensak-ref`. When OpenSAK changes the header rules
+the commit in `.github/opensak-ref`, together with the `deprecation.py` it
+imports (from v1.22.0; OpenSAK keeps that module free of other OpenSAK
+imports for this repository's sake). When OpenSAK changes the header rules
 (new permission words, new keys, new blocked hosts):
 
 1. Put the new OpenSAK commit (ideally a tagged release) in
@@ -69,7 +71,10 @@ the commit in `.github/opensak-ref`. When OpenSAK changes the header rules
 
 The checker also uses two internal helpers of the parser (`_header_lines`,
 `_KEY_LINE`) to see which keys are actually written. If "Test checker"
-fails after a bump, look there first.
+fails after a bump, look there first. If it fails with `ModuleNotFoundError`,
+`metadata.py` has gained another top-level import: add that file to
+`PARSER_FILES` in `check.yml` and `index.yml` (and to the download in
+`tests/test_check_macro_pr.py`).
 
 ## The macro index
 
@@ -87,7 +92,7 @@ after changing the script or `.github/opensak-ref`.
 
 Locally (with the header parser in `.tools/`, see `tests/`):
 
-    python scripts/build_index.py --metadata .tools/macro_metadata.py --ref main
+    python scripts/build_index.py --metadata .tools/opensak/macro/metadata.py --ref main
 
 Format (`schema` 1; fields are only ever added, a breaking change raises
 `schema`):
@@ -97,7 +102,7 @@ Format (`schema` 1; fields are only ever added, a breaking change raises
 | `schema`, `commit`, `generated` | format version; the `main` commit indexed and its date (UTC) |
 | `macros[]` | one entry per folder under `macros/` that has `<folder>/<folder>.lua` |
 | `.id`, `.folder`, `.file`, `.readme`, `.page` | folder name, paths in the repository, link to the folder on GitHub |
-| `.name`, `.author`, `.version`, `.description`, `.requires_api`, `.permissions`, `.network`, `.headless` | the header, read with OpenSAK's parser (`headless` is null with a parser from before API 4) |
+| `.name`, `.author`, `.version`, `.description`, `.requires_api`, `.permissions`, `.network`, `.headless` | the header, read with OpenSAK's parser (`headless` stays null until OpenSAK's parser has a Headless key; v1.22.0 doesn't) |
 | `.files[]` | every file in the folder: `path`, `size`, `sha256`, and a download `url` pinned to `commit` |
 | `.versions[]` | every version that was on `main`, newest first: `version`, `published` (date it first reached `main`), `commit`, `requires_api`, `permissions`, `network`, and `size`, `sha256`, `url` of the macro file |
 | `.published`, `.updated` | when the first and the current version reached `main` |

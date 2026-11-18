@@ -27,7 +27,9 @@ concurrency:
 
 env:
   INDEX_BRANCH: index
-  PARSER_URL: https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK/%s/src/opensak/macro/metadata.py
+  # metadata.py imports deprecation.py (from v1.22.0); both are needed.
+  PARSER_URL: https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK/%s/src/opensak/macro
+  PARSER_FILES: metadata.py deprecation.py
 
 jobs:
   index:
@@ -48,15 +50,17 @@ jobs:
 
       - name: Get OpenSAK header parser
         run: |
-          mkdir -p "$RUNNER_TEMP/tools"
           ref=$(grep -v '^#' .github/opensak-ref | head -n 1 | tr -d '[:space:]')
-          curl -fsSL -o "$RUNNER_TEMP/tools/macro_metadata.py" "$(printf "$PARSER_URL" "$ref")"
+          mkdir -p "$RUNNER_TEMP/opensak-src/opensak/macro"
+          for f in $PARSER_FILES; do
+            curl -fsSL -o "$RUNNER_TEMP/opensak-src/opensak/macro/$f" "$(printf "$PARSER_URL" "$ref")/$f"
+          done
 
       - name: Build index.json
         run: |
           mkdir -p "$RUNNER_TEMP/out"
           python -I scripts/build_index.py --repo . --ref HEAD \
-            --metadata "$RUNNER_TEMP/tools/macro_metadata.py" \
+            --metadata "$RUNNER_TEMP/opensak-src/opensak/macro/metadata.py" \
             --repository "$GITHUB_REPOSITORY" \
             --output "$RUNNER_TEMP/out/index.json"
 

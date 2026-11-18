@@ -3,13 +3,17 @@ Tests for scripts/check_macro_pr.py.
 
 They need OpenSAK's header parser. In CI the workflow downloads it; locally:
 
-    ref=$(grep -v '^#' .github/opensak-ref | head -n 1)
-    mkdir -p .tools && curl -fsSL -o .tools/macro_metadata.py \
-      https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK/$ref/src/opensak/macro/metadata.py
+    ref=$(grep -v '^#' .github/opensak-ref | head -n 1 | tr -d '[:space:]')
+    mkdir -p .tools/opensak/macro
+    for f in metadata.py deprecation.py; do
+      curl -fsSL -o .tools/opensak/macro/$f \
+        https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK/$ref/src/opensak/macro/$f
+    done
     pip install "lupa>=2.0,<3" pytest
     pytest -v tests/
 
-Set MACRO_METADATA to use a parser somewhere else.
+Set MACRO_METADATA to use a parser somewhere else (e.g. an OpenSAK
+checkout's src/opensak/macro/metadata.py).
 """
 
 from __future__ import annotations
@@ -26,7 +30,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 import check_macro_pr as cm
 
-METADATA = Path(os.environ.get("MACRO_METADATA", ROOT / ".tools" / "macro_metadata.py"))
+METADATA = Path(os.environ.get("MACRO_METADATA", ROOT / ".tools" / "opensak" / "macro" / "metadata.py"))
 if not METADATA.is_file():
     pytest.skip(f"OpenSAK header parser not found at {METADATA} (see module docstring)",
                 allow_module_level=True)
