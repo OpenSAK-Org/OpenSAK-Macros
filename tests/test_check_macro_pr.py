@@ -1,19 +1,23 @@
 """
 Tests for scripts/check_macro_pr.py.
 
-They need OpenSAK's header parser. In CI the workflow downloads it; locally:
+They need OpenSAK's header parser. In CI the workflow fetches the whole
+src/opensak folder of the pinned commit (the stable-release check uses
+OpenSAK's runtime); locally:
 
     ref=$(grep -v '^#' .github/opensak-ref | head -n 1 | tr -d '[:space:]')
-    mkdir -p .tools/opensak/macro
-    for f in metadata.py deprecation.py; do
-      curl -fsSL -o .tools/opensak/macro/$f \
-        https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK/$ref/src/opensak/macro/$f
-    done
-    pip install "lupa>=2.0,<3" pytest
+    git init -q /tmp/opensak-src && cd /tmp/opensak-src
+    git remote add origin https://github.com/OpenSAK-Org/OpenSAK
+    git sparse-checkout set --no-cone /src/opensak/
+    git fetch -q --depth 1 --filter=blob:none origin "$ref" && git checkout -q FETCH_HEAD
+    cd - && mkdir -p .tools && cp -r /tmp/opensak-src/src/opensak .tools/opensak
+    pip install "lupa>=2.0,<3" "sqlalchemy>=2.0,<2.2" "lxml>=5.0,<7" certifi pytest
     pytest -v tests/
 
-Set MACRO_METADATA to use a parser somewhere else (e.g. an OpenSAK
-checkout's src/opensak/macro/metadata.py).
+With only metadata.py and deprecation.py in .tools/opensak/macro, the test
+of OpenSAK's real stable-release helpers is skipped. Set MACRO_METADATA to
+use a parser somewhere else (e.g. an OpenSAK checkout's
+src/opensak/macro/metadata.py).
 """
 
 from __future__ import annotations
@@ -40,10 +44,10 @@ LUA = cm.LuaChecker()
 
 
 def macro(version="1.0", permissions="none", network=None, body='opensak.log("hi")\n',
-          drop=()):
+          drop=(), api="3"):
     header = {
         "Name": "Test macro", "Author": "Tester", "Version": version,
-        "Requires-API": "3", "Description": "Does a test.", "Permissions": permissions,
+        "Requires-API": api, "Description": "Does a test.", "Permissions": permissions,
     }
     if network is not None:
         header["Network"] = network
@@ -78,13 +82,14 @@ class Repo:
         self.git("commit", "-q", "--allow-empty", "-m", msg)
         return self.git("rev-parse", "HEAD")
 
-    def pr(self, files: dict[str, str | None]) -> cm.Result:
-        """Commit *files* on a branch off main and check it against main."""
+    def pr(self, files: dict[str, str | None], **kw) -> cm.Result:
+        """Commit *files* on a branch off main and check it against main;
+        *kw* goes to check() (stable, stable_mode)."""
         self.git("checkout", "-q", "-B", "pr", "main")
         self.write(files)
         head = self.commit("pr")
         self.git("checkout", "-q", "main")
-        return cm.check(self.path, "main", head, MD, LUA)
+        return cm.check(self.path, "main", head, MD, LUA, **kw)
 
     def merge_to_main(self, files: dict[str, str | None]):
         self.write(files)
@@ -266,3 +271,101 @@ def test_template_passes_header_and_syntax():
     cm.check_header(MD, text, "template/my-macro/my-macro.lua", result)
     result.errors.extend(LUA.errors(text, "my-macro.lua"))
     assert result.ok, messages(result)
+
+
+# --- against the stable release ------------------------------------------------
+#
+# With a Stable made here, as OpenSAK v1.22.0's helpers report it: API 4, and
+# opensak.get_url() beta-only. The real helpers need OpenSAK's runtime; the
+# last test uses them when a whole src/opensak tree is around the parser.
+
+def _find_get_url(text):
+    return [(n, "opensak.get_url is only available in beta builds (feature "
+                "flag lua-macro-net), not in stable releases")
+            for n, line in enumerate(text.splitlines(), 1)
+            if "opensak.get_url" in line.split("--", 1)[0]]
+
+
+V1_22 = cm.Stable(api=4, opensak_version="1.22.0",
+                  beta_only_names=("opensak.get_url",), find_beta_only=_find_get_url)
+V1_23 = cm.Stable(api=5, opensak_version="1.23.0", beta_only_names=(),
+                  find_beta_only=lambda text: [])
+
+
+def warnings(result):
+    return " | ".join(p.message for p in result.warnings)
+
+
+def test_stable_checks_off_by_default(repo):
+    r = repo.pr(new_macro(api="9"), stable=V1_22)
+    assert r.ok and not r.warnings and r.stable_api is None
+
+
+def test_requires_api_above_stable_fails_in_error_mode(repo):
+    r = repo.pr(new_macro(api="5"), stable=V1_22, stable_mode="error")
+    assert not r.ok
+    assert "Requires-API is 5" in messages(r)
+    assert "macro API 4 (OpenSAK 1.22.0)" in messages(r)
+    assert r.stable_api == 4
+
+
+def test_requires_api_above_stable_is_a_warning_in_warn_mode(repo):
+    r = repo.pr(new_macro(api="5"), stable=V1_22, stable_mode="warn")
+    assert r.ok, messages(r)
+    assert "Requires-API is 5" in warnings(r)
+    assert "becomes an error" in warnings(r)
+
+
+@pytest.mark.parametrize("api", ["3", "4"])
+def test_requires_api_up_to_stable_passes(repo, api):
+    r = repo.pr(new_macro(api=api), stable=V1_22, stable_mode="error")
+    assert r.ok and not r.warnings, messages(r) + warnings(r)
+
+
+def test_get_url_is_flagged_as_beta_only(repo):
+    body = 'local page = opensak.get_url("https://example.com/")\n-- opensak.get_url in a comment\n'
+    r = repo.pr(new_macro(body=body, network="example.com"),
+                stable=V1_22, stable_mode="error")
+    assert r.ok, messages(r)      # a warning, not an error
+    flagged = [p for p in r.warnings if "get_url" in p.message and p.line]
+    assert [(p.file, p.line) for p in flagged] == [("macros/test-macro/test-macro.lua", 10)]
+    assert "Network declares web sites" in warnings(r)
+    assert r.beta_only == ["opensak.get_url", "Network"]
+
+
+def test_nothing_beta_only_once_get_url_is_stable(repo):
+    body = 'local page = opensak.get_url("https://example.com/")\n'
+    r = repo.pr(new_macro(api="5", body=body, network="example.com"),
+                stable=V1_23, stable_mode="error")
+    assert r.ok and not r.warnings, messages(r) + warnings(r)
+    assert r.beta_only == []
+
+
+def test_stable_check_that_cannot_load(repo, monkeypatch):
+    def broken(md):
+        raise ModuleNotFoundError("No module named 'sqlalchemy'")
+    monkeypatch.setattr(cm, "load_stable", broken)
+    r = repo.pr(new_macro(), stable_mode="warn")
+    assert r.ok and "sqlalchemy" in warnings(r)
+    r = repo.pr(new_macro(), stable_mode="error")
+    assert not r.ok and "sqlalchemy" in messages(r)
+
+
+def test_report_and_json_show_warnings(repo):
+    r = repo.pr(new_macro(api="5"), stable=V1_22, stable_mode="warn")
+    text = cm.report(r)
+    assert "Checked against the stable release: macro API 4" in text
+    assert "⚠️ Warnings" in text and "Requires-API is 5" in text
+    data = r.as_json()
+    assert data["ok"] and data["stable_api"] == 4 and data["warnings"]
+
+
+def test_real_helpers_of_the_pinned_opensak():
+    """OpenSAK's own helpers, when the whole src/opensak tree of the pinned
+    commit is around the parser and its dependencies are installed (as in
+    the Check macro job)."""
+    if not (METADATA.parent / "runtime.py").is_file():
+        pytest.skip("only metadata.py is here, not OpenSAK's whole src/opensak tree")
+    stable = cm.load_stable(MD)
+    assert stable.api >= 4
+    assert stable.opensak_version != "?"

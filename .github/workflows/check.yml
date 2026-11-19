@@ -10,9 +10,12 @@
 # "Test checker" runs the tests with the pull request's version of the
 # scripts, for pull requests that change them.
 #
-# The header parser is OpenSAK's src/opensak/macro/metadata.py (with the
-# deprecation.py it imports), downloaded from the commit in
-# .github/opensak-ref into an opensak/macro/ folder.
+# The header parser is OpenSAK's src/opensak/macro/metadata.py. Both jobs
+# fetch the whole src/opensak folder of the commit in .github/opensak-ref
+# (a sparse, shallow git fetch), because the checks against the stable
+# release use OpenSAK's helpers in metadata.py, which import its macro
+# runtime: that needs OPENSAK_DEPS (no Qt). The mode of those checks
+# (off / warn / error) is in .github/stable-checks.
 
 name: Check
 
@@ -28,12 +31,10 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  LUPA: "lupa>=2.0,<3"
-  PARSER_URL: https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK/%s/src/opensak/macro
-  # The modules metadata.py imports (deprecation.py from v1.22.0). An older
-  # ref doesn't have them and doesn't need them; if one is missing that is
-  # needed, loading the parser fails with ModuleNotFoundError.
-  PARSER_DEPS: deprecation.py
+  # What OpenSAK's macro runtime imports, as pinned in OpenSAK's pyproject.toml
+  # (space-separated; used unquoted, so no spaces inside a requirement)
+  OPENSAK_DEPS: "lupa>=2.0,<3 sqlalchemy>=2.0,<2.2 lxml>=5.0,<7 certifi"
+  OPENSAK_REPO: https://github.com/OpenSAK-Org/OpenSAK
 
 jobs:
   check-macro:
@@ -49,10 +50,11 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install Lua compiler
-        run: pip install "$LUPA"
+      - name: Install Lua compiler and OpenSAK's macro runtime dependencies
+        run: pip install $OPENSAK_DEPS
 
-      - name: Get checker (from main) and OpenSAK header parser
+      - name: Get checker and settings (from main) and OpenSAK's source
+        id: setup
         env:
           BASE: ${{ github.event.pull_request.base.sha }}
         run: |
@@ -60,22 +62,31 @@ jobs:
           from_main() { git show "$BASE:$1" 2>/dev/null || cat "$1"; }
           from_main scripts/check_macro_pr.py > "$RUNNER_TEMP/tools/check_macro_pr.py"
           ref=$(from_main .github/opensak-ref | grep -v '^#' | head -n 1 | tr -d '[:space:]')
-          dir="$RUNNER_TEMP/opensak-src/opensak/macro"
-          url="$(printf "$PARSER_URL" "$ref")"
-          mkdir -p "$dir"
-          curl -fsSL -o "$dir/metadata.py" "$url/metadata.py"
-          for f in $PARSER_DEPS; do
-            curl -fsSL -o "$dir/$f" "$url/$f" || echo "::notice::No $f at $ref (not needed there)"
-          done
+          mode=$(from_main .github/stable-checks 2>/dev/null | grep -v '^#' | head -n 1 | tr -d '[:space:]')
+          echo "stable_checks=${mode:-off}" >> "$GITHUB_OUTPUT"
+          src="$RUNNER_TEMP/opensak-git"
+          git init -q "$src"
+          git -C "$src" remote add origin "$OPENSAK_REPO"
+          git -C "$src" sparse-checkout set --no-cone /src/opensak/
+          git -C "$src" fetch -q --depth 1 --filter=blob:none origin "$ref"
+          git -C "$src" checkout -q FETCH_HEAD
 
       - name: Check macro
         env:
           BASE: ${{ github.event.pull_request.base.sha }}
           HEAD: ${{ github.event.pull_request.head.sha }}
+          STABLE_CHECKS: ${{ steps.setup.outputs.stable_checks }}
         run: |
-          python -I "$RUNNER_TEMP/tools/check_macro_pr.py" \
+          checker="$RUNNER_TEMP/tools/check_macro_pr.py"
+          stable=()
+          # A checker on main from before --stable-checks doesn't know it
+          if grep -q -- "--stable-checks" "$checker"; then
+            stable=(--stable-checks "$STABLE_CHECKS")
+          fi
+          python -I "$checker" \
             --repo . --base "$BASE" --head "$HEAD" \
-            --metadata "$RUNNER_TEMP/opensak-src/opensak/macro/metadata.py"
+            --metadata "$RUNNER_TEMP/opensak-git/src/opensak/macro/metadata.py" \
+            "${stable[@]}"
 
   test-checker:
     name: Test checker
@@ -90,18 +101,19 @@ jobs:
           python-version: "3.12"
 
       - name: Install
-        run: pip install "$LUPA" pytest
+        run: pip install $OPENSAK_DEPS pytest
 
-      - name: Get OpenSAK header parser
+      - name: Get OpenSAK's source
         run: |
           ref=$(grep -v '^#' .github/opensak-ref | head -n 1 | tr -d '[:space:]')
-          dir=".tools/opensak/macro"
-          url="$(printf "$PARSER_URL" "$ref")"
-          mkdir -p "$dir"
-          curl -fsSL -o "$dir/metadata.py" "$url/metadata.py"
-          for f in $PARSER_DEPS; do
-            curl -fsSL -o "$dir/$f" "$url/$f" || echo "::notice::No $f at $ref (not needed there)"
-          done
+          src="$RUNNER_TEMP/opensak-git"
+          git init -q "$src"
+          git -C "$src" remote add origin "$OPENSAK_REPO"
+          git -C "$src" sparse-checkout set --no-cone /src/opensak/
+          git -C "$src" fetch -q --depth 1 --filter=blob:none origin "$ref"
+          git -C "$src" checkout -q FETCH_HEAD
+          mkdir -p .tools
+          mv "$src/src/opensak" .tools/opensak
 
       - name: Run tests
         run: pytest -v tests/

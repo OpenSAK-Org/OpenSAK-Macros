@@ -41,7 +41,7 @@ required in this repository:
 | `Author` | Your name or nickname |
 | `Version` | Numbers separated by dots, e.g. `1.0` or `1.2.3`. Must be higher than the version already in the repository |
 | `Description` | One line saying what the macro does |
-| `Requires-API` | The macro API version the macro needs, e.g. `3` (in OpenSAK: `opensak.api_version()`) |
+| `Requires-API` | The lowest macro API version the macro needs, e.g. `4` (in OpenSAK: `opensak.api_version()`) — see [Which OpenSAK version](#which-opensak-version) |
 | `Permissions` | What the macro does beyond reading — see below. Write `none` if it needs nothing |
 | `Network` | Only if the macro contacts web sites: the host names, comma-separated |
 
@@ -70,6 +70,27 @@ subdomains are not allowed: the Geocaching.com terms of use don't permit
 automated access outside their API,
 so OpenSAK will never let a macro contact them.
 
+### Which OpenSAK version
+
+Macros in this repository should run on the **stable** OpenSAK release
+people have installed, not only on a beta. Each API version needs:
+
+| `Requires-API` | OpenSAK |
+|---|---|
+| `4` or lower | 1.22.0 or newer — the first stable release with macros |
+| `5` | 1.23.0 or newer (in beta until 1.23.0 is released) |
+
+Later API versions only add to the API, so a macro written for API 4 keeps
+working in later releases. Declare the **lowest** version your macro really
+needs: if it only uses functions API 4 has, write `4` even if you wrote it
+on a newer OpenSAK. The Lua API reference (F1 in OpenSAK's macro editor,
+or [docs/macros/api.md](https://github.com/OpenSAK-Org/OpenSAK/blob/main/docs/macros/api.md))
+says which API version added each function.
+
+Some functions are only in beta builds until a stable release has them;
+until v1.23.0 that is `opensak.get_url()` (and so the `Network` header). A
+macro that uses one works only for people running a beta.
+
 ## Automatic checks
 
 Every pull request is checked automatically. The check fails if:
@@ -80,6 +101,11 @@ Every pull request is checked automatically. The check fails if:
 - `Version` isn't higher than the version already in the repository
 - a `.lua` file isn't valid Lua 5.4
 - the pull request changes more than one macro folder
+- `Requires-API` is higher than the newest stable OpenSAK release has
+  (right now only a warning, until OpenSAK 1.23.0 is released)
+
+It also warns, without failing, when the macro uses a function that is only
+in beta builds, or declares `Network` while `opensak.get_url()` is beta-only.
 
 One macro per pull request keeps review simple. To submit two macros, open two
 pull requests.

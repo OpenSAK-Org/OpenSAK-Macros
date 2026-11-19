@@ -8,9 +8,10 @@ itself, a README explaining what it does, and optionally example files or
 screenshots. All macros are reviewed by a maintainer before they are first
 published, and every change is checked automatically.
 
-> Macros need an OpenSAK version with macro support (currently in beta).
-> Each macro's header says which macro API version it needs (`Requires-API`).
-> The Macro manager warns you if your OpenSAK is too old for a macro.
+> Macros need OpenSAK 1.22.0 or newer. Each macro's header says which macro
+> API version it needs (`Requires-API`): API 4 or lower runs on OpenSAK
+> 1.22.0, API 5 needs 1.23.0 (in beta until it is released). The Macro
+> manager warns you if your OpenSAK is too old for a macro.
 
 ## Using a macro
 

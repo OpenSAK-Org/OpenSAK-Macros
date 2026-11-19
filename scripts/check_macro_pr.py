@@ -23,6 +23,19 @@ Rules (see CONTRIBUTING.md):
   - Version is higher than on the base branch when a .lua file changed
   - every .lua file in the folder is valid Lua 5.4 source (text, not bytecode)
 
+Checks against the stable OpenSAK release (--stable-checks, the mode in
+.github/stable-checks), so macros published here run on the stable release
+users have, not only on a beta:
+  - Requires-API is not higher than the newest macro API a stable release
+    has (an error in "error" mode, a warning in "warn" mode)
+  - warnings for calls of beta-only functions (e.g. opensak.get_url() before
+    v1.23.0) and for a Network header while get_url() is beta-only
+These use OpenSAK's own helpers (newest_stable_api(), find_beta_only() in
+metadata.py), which import OpenSAK's macro runtime: they need the whole
+src/opensak folder of the pinned commit next to metadata.py, with lupa,
+SQLAlchemy and lxml installed (the workflow does that). They report what
+the pinned commit's stable release has, whatever build runs them.
+
 The result is printed, written to the job summary ($GITHUB_STEP_SUMMARY) and,
 with --json, saved for the auto-merge workflow: the folder, whether it is a
 new macro, what the update declares beyond the base version
@@ -42,6 +55,7 @@ import sys
 from dataclasses import asdict, dataclass, field
 from pathlib import Path, PurePosixPath
 from types import ModuleType
+from typing import Callable
 
 MACROS_DIR = "macros"
 FOLDER_NAME = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
@@ -70,6 +84,12 @@ class Result:
     added_permissions: list[str] = field(default_factory=list)
     review_reasons: list[str] = field(default_factory=list)
     errors: list[Problem] = field(default_factory=list)
+    # Things that don't fail the check, e.g. beta-only functions
+    warnings: list[Problem] = field(default_factory=list)
+    # The newest macro API of a stable release, when checked against it
+    stable_api: int | None = None
+    # Beta-only things the macro uses ("opensak.get_url", "Network")
+    beta_only: list[str] = field(default_factory=list)
 
     @property
     def ok(self) -> bool:
@@ -81,6 +101,9 @@ class Result:
 
     def error(self, message: str, file: str = "", line: int = 0) -> None:
         self.errors.append(Problem(message, file, line))
+
+    def warning(self, message: str, file: str = "", line: int = 0) -> None:
+        self.warnings.append(Problem(message, file, line))
 
     def as_json(self) -> dict:
         data = asdict(self)
@@ -198,6 +221,73 @@ class LuaChecker:
         return [Problem(f"Lua syntax error: {message}", path)]
 
 
+# --- the stable release ------------------------------------------------------
+
+STABLE_MODES = ("off", "warn", "error")
+GET_URL = "opensak.get_url"
+
+
+@dataclass
+class Stable:
+    """What the stable OpenSAK release of the pinned commit has: the newest
+    macro API (and the OpenSAK version that brought it), the names of the
+    beta-only functions and fields, and OpenSAK's finder for their use in
+    macro source."""
+
+    api: int
+    opensak_version: str
+    beta_only_names: tuple[str, ...]
+    find_beta_only: Callable[[str], list[tuple[int, str]]]
+
+    @property
+    def get_url_beta_only(self) -> bool:
+        return GET_URL in self.beta_only_names
+
+
+def load_stable(md: ModuleType) -> Stable:
+    """Stable from OpenSAK's helpers in *md*, loaded by
+    load_metadata_module() from a whole src/opensak tree. Raises if the
+    helpers are missing (a parser older than v1.22.0) or OpenSAK's runtime
+    can't be imported (e.g. a dependency not installed)."""
+    api = md.newest_stable_api()
+    # On sys.path through load_metadata_module()
+    from opensak.macro.runtime import API_STABLE  # type: ignore[import-not-found]
+    names = tuple(n.name for n in md.beta_only_names())
+    return Stable(api, API_STABLE.get(api, "?"), names, md.find_beta_only)
+
+
+def check_stable(info, sources: dict[str, str], main: str, stable: Stable,
+                 mode: str, result: Result) -> None:
+    """The checks against the stable release. *sources* holds the folder's
+    .lua files (path -> source)."""
+    result.stable_api = stable.api
+    needed = info.requires_api_number
+    if needed is not None and needed > stable.api:
+        message = (f"Requires-API is {needed}, but the newest stable OpenSAK "
+                   f"release has macro API {stable.api} (OpenSAK "
+                   f"{stable.opensak_version}), so the macro can't run there. "
+                   "Declare the lowest API version the macro really needs; if "
+                   f"it needs API {needed}, it can be published when a stable "
+                   "release has it.")
+        if mode == "error":
+            result.error(message, main)
+        else:
+            result.warning(message + " This becomes an error when the next "
+                           "stable release is out.", main)
+
+    for path, text in sources.items():
+        for line, message in stable.find_beta_only(text):
+            result.warning(f"{message}: the macro won't work in the stable "
+                           "release.", path, line)
+            for name in stable.beta_only_names:
+                if name in message and name not in result.beta_only:
+                    result.beta_only.append(name)
+    if info.network and stable.get_url_beta_only:
+        result.warning("Network declares web sites, but opensak.get_url() is "
+                       "only in beta builds, not in the stable release.", main)
+        result.beta_only.append("Network")
+
+
 # --- the check ---------------------------------------------------------------
 
 def check_header(md: ModuleType, text: str, path: str, result: Result):
@@ -241,7 +331,11 @@ def check_header(md: ModuleType, text: str, path: str, result: Result):
 
 
 def check(repo: Path, base: str, head: str, md: ModuleType,
-          lua: LuaChecker | None = None) -> Result:
+          lua: LuaChecker | None = None, stable: Stable | None = None,
+          stable_mode: str = "off") -> Result:
+    """Checks the pull request *head* against *base*. With *stable_mode*
+    "warn" or "error" also against the stable release: *stable*, or loaded
+    from *md* if not given."""
     git = Git(repo)
     result = Result()
     changed = git.changed_paths(base, head)
@@ -296,12 +390,14 @@ def check(repo: Path, base: str, head: str, md: ModuleType,
 
     if lua is None:
         lua = LuaChecker()
+    sources: dict[str, str] = {}
     for path in head_files:
         if not path.lower().endswith(".lua"):
             continue
         data = git.read(head, path)
         text = decode(data or b"", path, result)
         if text is not None:
+            sources[path] = text
             result.errors.extend(lua.errors(text, path))
 
     if main not in head_files:
@@ -330,6 +426,20 @@ def check(repo: Path, base: str, head: str, md: ModuleType,
                      f"on {MACROS_DIR}/ now) when a .lua file changes; it is "
                      f"{info.version}.", main)
 
+    if stable_mode != "off":
+        if stable is None:
+            try:
+                stable = load_stable(md)
+            except Exception as exc:   # an old parser, a missing dependency
+                message = ("Could not check the macro against the stable "
+                           f"OpenSAK release: {type(exc).__name__}: {exc}")
+                if stable_mode == "error":
+                    result.error(message)
+                else:
+                    result.warning(message)
+        if stable is not None:
+            check_stable(info, sources, main, stable, stable_mode, result)
+
     added = md.added_permissions(old, info) if old is not None else info.declared
     result.added_permissions = list(added)
     if result.status == "update" and added:
@@ -352,14 +462,22 @@ def report(result: Result) -> str:
                          + ", ".join(f"`{p}`" for p in result.added_permissions))
     else:
         lines.append("### No macro folder changed")
+    if result.stable_api is not None:
+        lines.append(f"Checked against the stable release: macro API {result.stable_api}")
     lines.append("")
+
+    def where(p: Problem) -> str:
+        return f"`{p.file}{':' + str(p.line) if p.line else ''}`: " if p.file else ""
+
     if result.ok:
         lines.append("✅ All checks passed.")
     else:
         lines.append("❌ Problems found:")
-        for p in result.errors:
-            where = f"`{p.file}{':' + str(p.line) if p.line else ''}`: " if p.file else ""
-            lines.append(f"- {where}{p.message}")
+        lines.extend(f"- {where(p)}{p.message}" for p in result.errors)
+    if result.warnings:
+        lines.append("")
+        lines.append("⚠️ Warnings (they don't fail the check):")
+        lines.extend(f"- {where(p)}{p.message}" for p in result.warnings)
     lines.append("")
     if result.requires_review:
         lines.append("👀 Needs review by a maintainer:")
@@ -371,12 +489,13 @@ def report(result: Result) -> str:
 
 def annotate(result: Result) -> None:
     """GitHub Actions annotations, shown on the pull request's files."""
-    for p in result.errors:
-        loc = ""
-        if p.file:
-            loc = f" file={p.file}" + (f",line={p.line}" if p.line else "")
-        message = p.message.replace("%", "%25").replace("\n", "%0A")
-        print(f"::error{loc}::{message}")
+    for kind, problems in (("error", result.errors), ("warning", result.warnings)):
+        for p in problems:
+            loc = ""
+            if p.file:
+                loc = f" file={p.file}" + (f",line={p.line}" if p.line else "")
+            message = p.message.replace("%", "%25").replace("\n", "%0A")
+            print(f"::{kind}{loc}::{message}")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -387,10 +506,16 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--metadata", type=Path, required=True,
                         help="path to OpenSAK's src/opensak/macro/metadata.py")
     parser.add_argument("--json", type=Path, help="write the result here")
+    parser.add_argument("--stable-checks", choices=STABLE_MODES, default="off",
+                        help="check against the stable OpenSAK release: off, "
+                             "warn (warnings only) or error (a Requires-API "
+                             "above the stable API fails); needs the whole "
+                             "src/opensak tree around --metadata")
     args = parser.parse_args(argv)
 
     md = load_metadata_module(args.metadata)
-    result = check(args.repo, args.base, args.head, md)
+    result = check(args.repo, args.base, args.head, md,
+                   stable_mode=args.stable_checks)
 
     text = report(result)
     print(text)
