@@ -1,0 +1,269 @@
+{
+  "schema": 1,
+  "repository": "https://github.com/OpenSAK-Org/OpenSAK-Macros",
+  "commit": "70799520f99fa7d9967979f4936804bfa70bbf09",
+  "generated": "2026-11-19T06:45:24Z",
+  "macros": [
+    {
+      "id": "filter-available-and-solved",
+      "folder": "macros/filter-available-and-solved",
+      "name": "Filter Available and Solved",
+      "author": "OokOok",
+      "version": "1.1",
+      "description": "Filter the current view for available, unfound, non-owned caches, excluding unsolved Mystery/Unknown caches.",
+      "requires_api": 4,
+      "permissions": [
+        "none"
+      ],
+      "network": [],
+      "headless": null,
+      "file": "macros/filter-available-and-solved/filter-available-and-solved.lua",
+      "readme": "macros/filter-available-and-solved/README.md",
+      "page": "https://github.com/OpenSAK-Org/OpenSAK-Macros/tree/main/macros/filter-available-and-solved",
+      "files": [
+        {
+          "path": "macros/filter-available-and-solved/README.md",
+          "size": 800,
+          "sha256": "51c9cd6d2ea7a95eb31bcb5c5436e2a126d62384f49892f440b2988022d60c40",
+          "url": "https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK-Macros/70799520f99fa7d9967979f4936804bfa70bbf09/macros/filter-available-and-solved/README.md"
+        },
+        {
+          "path": "macros/filter-available-and-solved/filter-available-and-solved.lua",
+          "size": 1085,
+          "sha256": "9f8c3afe01ae636625f5ff0a602a93d8b8aa2adc70c3797b1ad8169d9b5978c2",
+          "url": "https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK-Macros/70799520f99fa7d9967979f4936804bfa70bbf09/macros/filter-available-and-solved/filter-available-and-solved.lua"
+        }
+      ],
+      "versions": [
+        {
+          "version": "1.1",
+          "published": "2026-11-17T23:30:37Z",
+          "commit": "e5412c41b87b313420240b5efcfeefdc2c46840a",
+          "requires_api": 4,
+          "permissions": [
+            "none"
+          ],
+          "network": [],
+          "size": 1085,
+          "sha256": "9f8c3afe01ae636625f5ff0a602a93d8b8aa2adc70c3797b1ad8169d9b5978c2",
+          "url": "https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK-Macros/e5412c41b87b313420240b5efcfeefdc2c46840a/macros/filter-available-and-solved/filter-available-and-solved.lua"
+        },
+        {
+          "version": "1.0",
+          "published": "2026-11-17T22:05:56Z",
+          "commit": "7f9cb59457cf28f0d5357f80cb9a475e5e9df0ae",
+          "requires_api": 4,
+          "permissions": [
+            "none"
+          ],
+          "network": [],
+          "size": 1045,
+          "sha256": "2abf0b2c581c350b2e37377d52a989deac12965e7156cb61e894cf9fd6639291",
+          "url": "https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK-Macros/7f9cb59457cf28f0d5357f80cb9a475e5e9df0ae/macros/filter-available-and-solved/filter-available-and-solved.lua"
+        }
+      ],
+      "published": "2026-11-17T22:05:56Z",
+      "updated": "2026-11-17T23:30:37Z",
+      "changelog": [
+        {
+          "version": "1.1",
+          "text": "remove unnecessary reference to \"Mystery Cache\" when evaluating a cache. provide popup feedback of # of caches matched."
+        },
+        {
+          "version": "1.0",
+          "text": "first version"
+        }
+      ]
+    },
+    {
+      "id": "gcdroid-export",
+      "folder": "macros/gcdroid-export",
+      "name": "Export to GCDroid",
+      "author": "nagisml",
+      "version": "1.0",
+      "description": "Writes the active database as a GCDroid database (GSAK's sqlite.db3 layout) with only what GCDroid reads",
+      "requires_api": 4,
+      "permissions": [
+        "write-files"
+      ],
+      "network": [],
+      "headless": null,
+      "file": "macros/gcdroid-export/gcdroid-export.lua",
+      "readme": "macros/gcdroid-export/README.md",
+      "page": "https://github.com/OpenSAK-Org/OpenSAK-Macros/tree/main/macros/gcdroid-export",
+      "files": [
+        {
+          "path": "macros/gcdroid-export/README.md",
+          "size": 3780,
+          "sha256": "4221085fd3010a6dd9cf00d0001c3d14cd427495e7d6ac46b3f401cb4dd0fa82",
+          "url": "https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK-Macros/70799520f99fa7d9967979f4936804bfa70bbf09/macros/gcdroid-export/README.md"
+        },
+        {
+          "path": "macros/gcdroid-export/gcdroid-export.lua",
+          "size": 23458,
+          "sha256": "2a0f03c04db24d70ac4a060e11a904d1664f7172ea4bc80d1d6a7b8b86608937",
+          "url": "https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK-Macros/70799520f99fa7d9967979f4936804bfa70bbf09/macros/gcdroid-export/gcdroid-export.lua"
+        }
+      ],
+      "versions": [
+        {
+          "version": "1.0",
+          "published": "2026-11-19T06:44:56Z",
+          "commit": "9a767135c88ee4f41bd80c8774615cf366b29325",
+          "requires_api": 4,
+          "permissions": [
+            "write-files"
+          ],
+          "network": [],
+          "size": 23458,
+          "sha256": "2a0f03c04db24d70ac4a060e11a904d1664f7172ea4bc80d1d6a7b8b86608937",
+          "url": "https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK-Macros/9a767135c88ee4f41bd80c8774615cf366b29325/macros/gcdroid-export/gcdroid-export.lua"
+        }
+      ],
+      "published": "2026-11-19T06:44:56Z",
+      "updated": "2026-11-19T06:44:56Z",
+      "changelog": [
+        {
+          "version": "1.0",
+          "text": "first version"
+        }
+      ]
+    },
+    {
+      "id": "new-since-last-run",
+      "folder": "macros/new-since-last-run",
+      "name": "New since last run",
+      "author": "nagisml",
+      "version": "1.01",
+      "description": "Show the unfound caches updated since the last run",
+      "requires_api": 3,
+      "permissions": [
+        "none"
+      ],
+      "network": [],
+      "headless": null,
+      "file": "macros/new-since-last-run/new-since-last-run.lua",
+      "readme": "macros/new-since-last-run/README.md",
+      "page": "https://github.com/OpenSAK-Org/OpenSAK-Macros/tree/main/macros/new-since-last-run",
+      "files": [
+        {
+          "path": "macros/new-since-last-run/README.md",
+          "size": 1177,
+          "sha256": "c8997827449507360b5c477d6f50aa104978f9f151c60904a55cb6d059f6b3e2",
+          "url": "https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK-Macros/70799520f99fa7d9967979f4936804bfa70bbf09/macros/new-since-last-run/README.md"
+        },
+        {
+          "path": "macros/new-since-last-run/new-since-last-run.lua",
+          "size": 1875,
+          "sha256": "8e2f2e35de380f2ac9ce7bb9f6b3feccc0b67ee5950aa301a341dc49c4d11fd5",
+          "url": "https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK-Macros/70799520f99fa7d9967979f4936804bfa70bbf09/macros/new-since-last-run/new-since-last-run.lua"
+        }
+      ],
+      "versions": [
+        {
+          "version": "1.01",
+          "published": "2026-10-25T13:12:13Z",
+          "commit": "3c0319d52664d27473837be552476f4d5ce4cdfe",
+          "requires_api": 3,
+          "permissions": [
+            "none"
+          ],
+          "network": [],
+          "size": 1875,
+          "sha256": "8e2f2e35de380f2ac9ce7bb9f6b3feccc0b67ee5950aa301a341dc49c4d11fd5",
+          "url": "https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK-Macros/3c0319d52664d27473837be552476f4d5ce4cdfe/macros/new-since-last-run/new-since-last-run.lua"
+        },
+        {
+          "version": "1.0",
+          "published": "2026-10-25T12:45:39Z",
+          "commit": "2ba7f354b16021844557495e59b2284d72f96876",
+          "requires_api": 3,
+          "permissions": [
+            "none"
+          ],
+          "network": [],
+          "size": 1873,
+          "sha256": "4d37ee406cc9ec8cf297d1000d5bdaf730d0e670b5cdc35cc3ebba4bf85962d7",
+          "url": "https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK-Macros/2ba7f354b16021844557495e59b2284d72f96876/macros/new-since-last-run/new-since-last-run.lua"
+        }
+      ],
+      "published": "2026-10-25T12:45:39Z",
+      "updated": "2026-10-25T13:12:13Z",
+      "changelog": [
+        {
+          "version": "1.01",
+          "text": "lists the last 10 runs instead of 5"
+        },
+        {
+          "version": "1.0",
+          "text": "first version"
+        }
+      ]
+    },
+    {
+      "id": "optimize-pqs",
+      "folder": "macros/optimize-pqs",
+      "name": "OptimizePQs",
+      "author": "OokOok",
+      "version": "1.0",
+      "description": "A port of the GSAK macro PlacedPQ",
+      "requires_api": 5,
+      "permissions": [
+        "open"
+      ],
+      "network": [],
+      "headless": null,
+      "file": "macros/optimize-pqs/optimize-pqs.lua",
+      "readme": "macros/optimize-pqs/README.md",
+      "page": "https://github.com/OpenSAK-Org/OpenSAK-Macros/tree/main/macros/optimize-pqs",
+      "files": [
+        {
+          "path": "macros/optimize-pqs/README.md",
+          "size": 1244,
+          "sha256": "6c3d08d66c867a9bb9c8afc7ad9367d40cbd39d59cbc548797cf74679ead37f2",
+          "url": "https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK-Macros/70799520f99fa7d9967979f4936804bfa70bbf09/macros/optimize-pqs/README.md"
+        },
+        {
+          "path": "macros/optimize-pqs/optimize-pqs.lua",
+          "size": 7569,
+          "sha256": "71fc658ffdc2bf196b18e389f53ccb339d3bb8d39152ce9ba81994e59a846660",
+          "url": "https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK-Macros/70799520f99fa7d9967979f4936804bfa70bbf09/macros/optimize-pqs/optimize-pqs.lua"
+        },
+        {
+          "path": "macros/optimize-pqs/screenshots/OptimizePQs.png",
+          "size": 115454,
+          "sha256": "4bae1fecfa08ff4a531146fd639c62f49ebfdfb2fab13ec3d24be974d0496e4c",
+          "url": "https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK-Macros/70799520f99fa7d9967979f4936804bfa70bbf09/macros/optimize-pqs/screenshots/OptimizePQs.png"
+        }
+      ],
+      "versions": [
+        {
+          "version": "1.0",
+          "published": "2026-11-15T07:03:05Z",
+          "commit": "105270edfa60d580abe6774e0109419e28b6e8fa",
+          "requires_api": 5,
+          "permissions": [
+            "open"
+          ],
+          "network": [],
+          "size": 7569,
+          "sha256": "71fc658ffdc2bf196b18e389f53ccb339d3bb8d39152ce9ba81994e59a846660",
+          "url": "https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK-Macros/105270edfa60d580abe6774e0109419e28b6e8fa/macros/optimize-pqs/optimize-pqs.lua"
+        }
+      ],
+      "published": "2026-11-15T07:03:05Z",
+      "updated": "2026-11-15T07:03:05Z",
+      "changelog": [
+        {
+          "version": "1.1",
+          "text": "fix typos in README.md"
+        },
+        {
+          "version": "1.0",
+          "text": "first version"
+        }
+      ]
+    }
+  ],
+  "withdrawn": []
+}
