@@ -123,6 +123,20 @@ class Git:
 # --- helpers -----------------------------------------------------------------
 
 def load_metadata_module(path: Path) -> ModuleType:
+    """Load OpenSAK's metadata.py from *path*.
+
+    From v1.22.0 on it imports opensak.macro.deprecation, which has no
+    OpenSAK imports of its own, so the two files work outside OpenSAK as a
+    pair. With *path* at <dir>/opensak/macro/metadata.py and deprecation.py
+    next to it (as the workflows download them), <dir> is put first on
+    sys.path so that import finds it. A parser in any other place (an older
+    one, which needs nothing else) is loaded as it is.
+    """
+    path = path.resolve()
+    if path.parent.name == "macro" and path.parent.parent.name == "opensak":
+        src = str(path.parents[2])
+        if src not in sys.path:
+            sys.path.insert(0, src)
     spec = importlib.util.spec_from_file_location("macro_metadata", path)
     if spec is None or spec.loader is None:
         raise SystemExit(f"Cannot load the OpenSAK header parser from {path}")
@@ -176,7 +190,8 @@ def header(md: ModuleType, data: bytes | None, path: str) -> dict[str, Any]:
         "permissions": list(info.permissions)
                        or ([md.NO_PERMISSIONS] if info.permissions_declared else []),
         "network": list(info.network),
-        # null with a parser from before the Headless key (API 4)
+        # null until OpenSAK's parser has the Headless key (planned, OpenSAK
+        # #1195; v1.22.0 doesn't have it yet)
         "headless": getattr(info, "runs_headless", None),
     }
 

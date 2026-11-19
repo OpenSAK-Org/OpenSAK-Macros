@@ -64,8 +64,10 @@ Declare everything the macro can do, not just what it usually does.
 
 List plain host names (or IP addresses): `api.example.com`, not
 `https://api.example.com/path`, no ports and no wildcards.
-`geocaching.com`, `coord.info` and their subdomains are not allowed — the
-Geocaching.com terms of use don't permit automated access outside their API,
+Geocaching HQ's sites — `geocaching.com`, `coord.info`, `groundspeak.com`,
+`waymarking.com`, `wherigo.com` and related domains — and their
+subdomains are not allowed: the Geocaching.com terms of use don't permit
+automated access outside their API,
 so OpenSAK will never let a macro contact them.
 
 ## Automatic checks
