@@ -26,6 +26,7 @@ Optional: a screenshot (put it in `screenshots/`) or an example file
 
 ## Changes
 
-Optional: a short note per version.
+Optional: a short note per version, one line each starting with the version.
+OpenSAK's Macro manager shows these notes when it offers an update.
 
 - 1.0 — first version

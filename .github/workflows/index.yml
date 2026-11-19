@@ -1,0 +1,97 @@
+# Builds index.json — the list of macros with versions, file sizes and
+# SHA-256 hashes that OpenSAK's Macro manager reads — after every push to
+# main, and publishes it on the "index" branch:
+#
+#   https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK-Macros/index/index.json
+#
+# The index branch has no history of main: it holds only index.json (and a
+# README saying where it comes from), one commit per change. Nobody edits it
+# by hand; a run that gives the same file pushes nothing.
+#
+# Runs scripts/build_index.py from main (only pushes to main trigger it), so
+# what lands in the index went through the pull request checks first. The
+# script reads git objects only; no macro code is run.
+
+name: Index
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: index
+  cancel-in-progress: false
+
+env:
+  INDEX_BRANCH: index
+  PARSER_URL: https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK/%s/src/opensak/macro/metadata.py
+
+jobs:
+  index:
+    name: Build and publish index.json
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          fetch-depth: 0          # the versions come from main's history
+          persist-credentials: false
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Get OpenSAK header parser
+        run: |
+          mkdir -p "$RUNNER_TEMP/tools"
+          ref=$(grep -v '^#' .github/opensak-ref | head -n 1 | tr -d '[:space:]')
+          curl -fsSL -o "$RUNNER_TEMP/tools/macro_metadata.py" "$(printf "$PARSER_URL" "$ref")"
+
+      - name: Build index.json
+        run: |
+          mkdir -p "$RUNNER_TEMP/out"
+          python -I scripts/build_index.py --repo . --ref HEAD \
+            --metadata "$RUNNER_TEMP/tools/macro_metadata.py" \
+            --repository "$GITHUB_REPOSITORY" \
+            --output "$RUNNER_TEMP/out/index.json"
+
+      - name: Publish on the index branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          out="$RUNNER_TEMP/out"
+          cat > "$out/README.md" <<'EOF'
+          # Macro index
+
+          `index.json` lists the macros on `main` with their versions, files,
+          sizes and SHA-256 hashes, for OpenSAK's Macro manager. It is built by
+          `.github/workflows/index.yml` after every push to `main`; don't edit
+          this branch by hand. The format is described in MAINTAINERS.md on
+          `main`.
+          EOF
+
+          remote="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          work="$RUNNER_TEMP/index-branch"
+          if git ls-remote --exit-code --heads "$remote" "$INDEX_BRANCH" >/dev/null; then
+            git clone -q --depth 1 --branch "$INDEX_BRANCH" "$remote" "$work"
+          else
+            git init -q -b "$INDEX_BRANCH" "$work"
+            git -C "$work" remote add origin "$remote"
+          fi
+          cp "$out/index.json" "$out/README.md" "$work/"
+          cd "$work"
+          git add index.json README.md
+          if git diff --cached --quiet; then
+            echo "index.json is unchanged."
+            exit 0
+          fi
+          git -c user.name="github-actions[bot]" \
+              -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+              commit -q -m "Index for ${GITHUB_SHA::7}"
+          git push -q origin "HEAD:$INDEX_BRANCH"
+          echo "Published index.json for ${GITHUB_SHA}." >> "$GITHUB_STEP_SUMMARY"

@@ -138,6 +138,19 @@ maintainer too.
 Every change to the `.lua` file needs a higher `Version`. A change to only the
 README or example files doesn't — but if in doubt, bump it.
 
+Add a line for the new version to the `## Changes` section of the README,
+starting with the version:
+
+```markdown
+## Changes
+
+- 1.1 — lists the last 10 runs instead of 5
+- 1.0 — first version
+```
+
+OpenSAK's Macro manager shows these lines when it offers the update (see
+[The macro index](MAINTAINERS.md#the-macro-index)).
+
 ## License
 
 By opening a pull request you agree that your contribution is published under

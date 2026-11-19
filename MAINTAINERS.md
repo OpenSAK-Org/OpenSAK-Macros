@@ -71,6 +71,47 @@ The checker also uses two internal helpers of the parser (`_header_lines`,
 `_KEY_LINE`) to see which keys are actually written. If "Test checker"
 fails after a bump, look there first.
 
+## The macro index
+
+After every push to `main`, **Index** (`.github/workflows/index.yml`) runs
+`scripts/build_index.py` and publishes `index.json` on the `index` branch:
+
+    https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK-Macros/index/index.json
+
+OpenSAK's Macro manager reads it to list, install and update macros, so it
+doesn't have to walk the repository through the GitHub API. Everything in it
+comes from `main`'s git history, so the same commit always gives the same
+file; a push that changes nothing in it (e.g. to MAINTAINERS.md) leaves the
+`index` branch alone. Run it by hand from the Actions tab ("Run workflow")
+after changing the script or `.github/opensak-ref`.
+
+Locally (with the header parser in `.tools/`, see `tests/`):
+
+    python scripts/build_index.py --metadata .tools/macro_metadata.py --ref main
+
+Format (`schema` 1; fields are only ever added, a breaking change raises
+`schema`):
+
+| Field | |
+|---|---|
+| `schema`, `commit`, `generated` | format version; the `main` commit indexed and its date (UTC) |
+| `macros[]` | one entry per folder under `macros/` that has `<folder>/<folder>.lua` |
+| `.id`, `.folder`, `.file`, `.readme`, `.page` | folder name, paths in the repository, link to the folder on GitHub |
+| `.name`, `.author`, `.version`, `.description`, `.requires_api`, `.permissions`, `.network`, `.headless` | the header, read with OpenSAK's parser (`headless` is null with a parser from before API 4) |
+| `.files[]` | every file in the folder: `path`, `size`, `sha256`, and a download `url` pinned to `commit` |
+| `.versions[]` | every version that was on `main`, newest first: `version`, `published` (date it first reached `main`), `commit`, `requires_api`, `permissions`, `network`, and `size`, `sha256`, `url` of the macro file |
+| `.published`, `.updated` | when the first and the current version reached `main` |
+| `.changelog[]` | `version` and `text` from the `## Changes` list in the README, newest first |
+| `.error` | only when the header couldn't be read |
+| `withdrawn[]` | macros that were on `main` and were removed: `id`, `folder`, `name`, `last_version`, `withdrawn` (date), and `versions[]` with the `sha256` of each, so OpenSAK can recognise an installed copy |
+
+Hashes are SHA-256 of the bytes in git, which are the bytes the `url`s
+serve. A macro is identified by its folder name, so renaming a folder lists
+the old name as withdrawn and the new one as a new macro.
+
+The `index` branch must stay writable by GitHub Actions: don't put it under
+the "Protect main" ruleset or any other ruleset that blocks pushes.
+
 ## Repository settings this relies on
 
 - Ruleset "Protect main" on the default branch: pull request required (0
@@ -80,3 +121,5 @@ fails after a bump, look there first.
 - Settings → General → Pull Requests → **Allow auto-merge** on.
 - Labels `macro problem`, `auto-merge` and `needs review`.
 - Discussions on.
+- The `index` branch is created by the first **Index** run and left
+  unprotected (see [The macro index](#the-macro-index)).
