@@ -1,7 +1,7 @@
 -- OpenSAK Macro
 -- Name: fix-owner-ids
 -- Author: Ian Cole
--- Version: 1.0
+-- Version: 1.1
 -- Requires-API: 3
 -- Description: Sets the Owner ID field of caches, where it is currently null or zero, by looking for the owner name 
 --              in a  reference database. All such entries in the current datanase are updated where possible 
@@ -17,7 +17,7 @@
 
 --              Inspired by the GSAK macro FixOwnerIDs by Tony Rolfe (Gill & Tony) and shared with their
 --              permission.
--- Permissions: write
+-- Permissions: write, read-files
 
 local names, current = {}, nil
 for _, db in ipairs(opensak.databases()) do

@@ -1,26 +1,27 @@
 # fix-owner-ids
 
-Sets the Owner ID field of caches, where it is currently null or zero, by looking for the owner name in a 
-reference database. For the macro to work successfully that reference database should contain entries
-(geocaches imported from geocaching.com) that contain populated OwnerName and OwnerId fields.
+Sets the Owner ID field of caches, where it is currently null or zero, by looking for the owner name 
+in a reference database. All such entries in the current datanase are updated where possible 
+(irrespective of filter).
 
-If the OwnerName is not found in the reference database then the OwnerID cannot currently be assigned. 
-When the geocaching.com API becomes available it should be possible to obtain the OwnerID through the
-API, but in the interim it can be set manually by anotyher macro.
- 
-I don't think that having invalid owner IDs causes any malfunction within OpenSAK, but it is good to keep things 
-tidy.
+Useful after importing lab caches from lab2gpx which does not populate Owner ID as part 
+of the .gpx file.
 
-It appears that Lab2GPX does not update the OwnerID, but this is not the only Issue I found.
+The reference database should contain caches with populated Owner ID fields, normally 
+non-lab caches imported from geocaching.com. The reference database is chosen from a form and can be
+the same as the current database.
 
-Useful after importing lab caches from lab2gpx which does not populate Owner ID as part of the .gpx file.
+Where no matching Owner Name in found in the reference database then the Owner ID field is not 
+updated. When the geocaching.com API access becomes available it should be possible to obtain the
+missing Owner IDs via the API, but until then manual correction will be needed.
 
-This is inspired by the GSAK macro FixOwnerIDs by Gill & Tony
+Inspired by the GSAK macro FixOwnerIDs by Tony Rolfe (Gill & Tony) and shared with their
+permission.
 
 ## What it needs
 
 - OpenSAK with macro API version 3 or newer
-- Permissions: none
+- Permissions: write, read-files
 
 ## How to use it
 
@@ -32,3 +33,4 @@ This is inspired by the GSAK macro FixOwnerIDs by Gill & Tony
 ## Changes
 
 - 1.0 — first version
+- 1.1 - Correct permissions
