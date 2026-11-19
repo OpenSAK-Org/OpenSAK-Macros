@@ -19,7 +19,7 @@ Opens .html page in your default browser upon completion.
 
 ## Example
 
-[Sample roadsheet](file:///examples/roadsheet-example.png)
+![RoadSheet example](examples/roadsheet-example.png)
 
 ## Changes
 
