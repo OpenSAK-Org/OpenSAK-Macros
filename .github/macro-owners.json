@@ -1,5 +1,7 @@
 {
   "filter-available-and-solved": ["dstein766"],
+  "gcdroid-export": ["nagisml"],
   "new-since-last-run": ["nagisml"],
-  "optimize-pqs": ["dstein766"]
+  "optimize-pqs": ["dstein766"],
+  "roadsheet": ["dstein766"]
 }
