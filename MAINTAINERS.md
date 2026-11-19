@@ -57,10 +57,13 @@ the README explains why.
 ## Changing the header rules
 
 The checks parse headers with OpenSAK's `src/opensak/macro/metadata.py` from
-the commit in `.github/opensak-ref`, together with the `deprecation.py` it
-imports (from v1.22.0; OpenSAK keeps that module free of other OpenSAK
-imports for this repository's sake). When OpenSAK changes the header rules
-(new permission words, new keys, new blocked hosts):
+the commit in `.github/opensak-ref`. "Check macro" and "Test checker" fetch
+that commit's whole `src/opensak` folder, because the stable-release checks
+(below) use OpenSAK's runtime; `auto-merge.yml` and `index.yml` only need
+`metadata.py` and the `deprecation.py` it imports (from v1.22.0; OpenSAK
+keeps that module free of other OpenSAK imports for this repository's
+sake). When OpenSAK changes the header rules (new permission words, new
+keys, new blocked hosts):
 
 1. Put the new OpenSAK commit (ideally a tagged release) in
    `.github/opensak-ref`, with the tag in the comment above it.
@@ -73,8 +76,35 @@ The checker also uses two internal helpers of the parser (`_header_lines`,
 `_KEY_LINE`) to see which keys are actually written. If "Test checker"
 fails after a bump, look there first. If it fails with `ModuleNotFoundError`,
 `metadata.py` has gained another top-level import: add that file to
-`PARSER_DEPS` in `check.yml` and `index.yml`, to the list in
-`auto-merge.yml` and to the download in `tests/test_check_macro_pr.py`.
+`PARSER_DEPS` in `index.yml` and to the list in `auto-merge.yml`. If
+"Check macro" can't load the stable-release check (a warning or error
+saying `ModuleNotFoundError`), OpenSAK's runtime imports a new package: add
+it to `OPENSAK_DEPS` in `check.yml`.
+
+## Checking against the stable release
+
+Macros here should run on the stable OpenSAK release. "Check macro" asks
+OpenSAK's own helpers in `metadata.py` (`newest_stable_api()`,
+`find_beta_only()`) at the commit in `.github/opensak-ref`:
+
+- `Requires-API` above the newest stable API is an error, or a warning
+- calls of beta-only functions, and a `Network` header while
+  `opensak.get_url()` is beta-only, are always warnings
+
+`.github/stable-checks` says which: `warn` while betas have a newer API than
+the pinned stable release, `error` once it is pinned to a stable release
+that has the newest API. Both files are read from `main`.
+
+**When OpenSAK releases a stable version**, in one pull request:
+
+1. Put the release's commit in `.github/opensak-ref` (tag in the comment).
+2. Set `.github/stable-checks` to `error`.
+3. Update the table in CONTRIBUTING.md ("Which OpenSAK version") and the
+   note at the top of README.md.
+
+"Test checker" then runs against the new release. Macros already on `main`
+aren't re-checked: look in the job summary of that pull request's checks,
+or run the checker locally, for macros that now get warnings.
 
 ## The macro index
 

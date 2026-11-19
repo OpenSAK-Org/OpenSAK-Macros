@@ -1,0 +1,11 @@
+# How scripts/check_macro_pr.py checks macros against the stable OpenSAK
+# release of the commit in .github/opensak-ref (see MAINTAINERS.md):
+#   off   - not at all
+#   warn  - warnings only: Requires-API above the stable API, beta-only
+#           functions (use this while the stable release is older than the
+#           macro API that betas have)
+#   error - a Requires-API above the stable API fails the check; beta-only
+#           functions are still warnings
+# The first line without "#" is used. Switch to "error" when opensak-ref is
+# moved to a new stable release.
+warn
