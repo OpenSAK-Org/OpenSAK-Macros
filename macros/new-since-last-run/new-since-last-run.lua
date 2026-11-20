@@ -1,7 +1,7 @@
 -- OpenSAK Macro
 -- Name: New since last run
 -- Author: nagisml
--- Version: 1.01
+-- Version: 1.02
 -- Requires-API: 3
 -- Description: Show the unfound caches updated since the last run
 -- Permissions: none
@@ -44,7 +44,8 @@ else
     if n == 0 then
         print("No unfound caches updated since " .. since .. " UTC — view unchanged.")
     else
-        print(("%d unfound caches updated since %s UTC"):format(n, since))
+        print(("%d unfound cache%s updated since %s UTC"):format(
+            n, n == 1 and "" or "s", since))
     end
     table.insert(s.runs, 1, { time = now, count = n })
 end
