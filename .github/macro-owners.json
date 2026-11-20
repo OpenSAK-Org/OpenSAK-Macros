@@ -1,5 +1,6 @@
 {
   "filter-available-and-solved": ["dstein766"],
+  "fix-owner-ids": ["ianwok"],
   "gcdroid-export": ["nagisml"],
   "new-since-last-run": ["nagisml"],
   "optimize-pqs": ["dstein766"],
