@@ -1,7 +1,7 @@
 -- OpenSAK Macro
 -- Name: New since last run
 -- Author: nagisml
--- Version: 1.02
+-- Version: 1.03
 -- Requires-API: 3
 -- Description: Show the unfound caches updated since the last run
 -- Permissions: none
@@ -55,5 +55,5 @@ opensak.settings.save(s)
 
 print("Last runs (UTC):")
 for _, run in ipairs(s.runs) do
-    print(("  %s  %d caches"):format(run.time, run.count))
+    print(("  %s  %d cache%s"):format(run.time, run.count, run.count == 1 and "" or "s"))
 end
