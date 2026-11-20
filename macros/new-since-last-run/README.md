@@ -30,5 +30,6 @@ and set it back to `false`. To keep more or fewer runs in the list, change
 
 ## Changes
 
+- 1.02 — says "1 unfound cache" instead of "1 unfound caches"
 - 1.01 — lists the last 10 runs instead of 5
 - 1.0 — first version
