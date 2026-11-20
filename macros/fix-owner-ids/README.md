@@ -35,3 +35,4 @@ permission.
 - 1.0 — first version
 - 1.1 — Correct permissions
 - 1.2 — Further permission correction and changes following review
+- 1.3 — Ensure ony entries in reference database that have populated IDs are used

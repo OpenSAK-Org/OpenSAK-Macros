@@ -1,7 +1,7 @@
 -- OpenSAK Macro
 -- Name: fix-owner-ids
 -- Author: Ian Cole
--- Version: 1.2
+-- Version: 1.3
 -- Requires-API: 3
 -- Description: Sets the Owner ID field of caches, where it is currently null or zero
 -- Permissions: write
@@ -26,12 +26,12 @@ local num_updates=0
 local msg = ""
 local n
 
--- Get owner name and ID table from the reference database
-local owner_rows = opensak.sql("SELECT owner_name, owner_id, COUNT (*) AS n FROM caches GROUP by owner_name",nil,{database=values.db})
+-- Get owner name and ID table from the reference database, ensuring that the entries chosen do have a populated ID
+local owner_rows = opensak.sql("SELECT owner_name, MAX(owner_id) AS owner_id FROM caches WHERE owner_id IS NOT NULL AND owner_id NOT IN ('','0') GROUP by owner_name",nil,{database=values.db})
 
 -- Find the Lab caches with blank owner_id (one row per owner_name)
 -- Originally database update was restricted to lab caches chosen by the GC Code prefix. However to make it independent of lab cache prefix
--- used that check is removed (because only lab caches should have an empty Owner ID anyway so the check is redunddant).
+-- used that check is removed (because only lab caches should have an empty Owner ID anyway so the check is redundant).
 --local blank_rows = opensak.sql("SELECT owner_name, owner_id FROM caches WHERE (owner_id IS NULL or owner_id IS 0)AND gc_code LIKE 'LB%' GROUP by owner_name")
 local blank_rows = opensak.sql("SELECT owner_name, owner_id FROM caches WHERE owner_id IS NULL or owner_id IS 0 GROUP by owner_name")
 
