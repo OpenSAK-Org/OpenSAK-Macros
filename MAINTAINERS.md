@@ -79,4 +79,33 @@ fails after a bump, look there first.
   list.
 - Settings → General → Pull Requests → **Allow auto-merge** on.
 - Labels `macro problem`, `auto-merge` and `needs review`.
+- A GitHub App that turns on auto-merge (see below), with variable
+  `AUTO_MERGE_APP_CLIENT_ID` and secret `AUTO_MERGE_APP_PRIVATE_KEY`.
+
+### The auto-merge app
+
+GitHub merges an auto-merge pull request as whoever turned auto-merge on.
+If that is `github.token`, the merge counts as a push by github-actions, and
+GitHub starts no workflows for those — so the Index workflow doesn't run and
+the update is missing from `index.json` until something else is pushed to
+`main`. Auto-merge is therefore turned on with a GitHub App's token.
+
+1. Organization settings → Developer settings → GitHub Apps → **New GitHub
+   App**. Any name (for example "OpenSAK Macros auto-merge"); untick
+   Webhook → Active. Repository permissions: **Contents: Read and write**,
+   **Pull requests: Read and write** (Metadata: Read is added by itself).
+   "Only on this account".
+2. On the app's page: note the **Client ID**, and **Generate a private key**
+   (a `.pem` file is downloaded).
+3. **Install App** → the organization → *Only select repositories* →
+   OpenSAK-Macros.
+4. In this repository: Settings → Secrets and variables → Actions —
+   variable `AUTO_MERGE_APP_CLIENT_ID` = the Client ID, secret
+   `AUTO_MERGE_APP_PRIVATE_KEY` = the whole `.pem` file. Then delete the
+   downloaded file.
+
+The app doesn't need to be in the ruleset's bypass list: auto-merge still
+waits for the required checks. Without the variable, `auto-merge.yml` falls
+back to `github.token` and warns in the run; run the index by hand after
+such a merge with `gh workflow run index.yml -R OpenSAK-Org/OpenSAK-Macros`.
 - Discussions on.

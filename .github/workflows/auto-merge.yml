@@ -12,8 +12,17 @@
 # GitHub itself turns auto-merge off whenever someone without write access
 # pushes new commits; this workflow then decides again for the new commits.
 #
-# Needs: Settings → General → "Allow auto-merge", and the labels
-# "auto-merge" and "needs review".
+# Auto-merge is turned on with a GitHub App's token, not github.token. GitHub
+# records the merge as done by whoever turned auto-merge on, and it starts no
+# workflows for pushes made with github.token, so a merge done for
+# github-actions would never run the Index workflow and the update would be
+# missing from index.json. A merge done for the app is an ordinary push to
+# main and runs Index as usual. Without the app configured, the workflow
+# falls back to github.token and warns that the index won't be rebuilt.
+#
+# Needs: Settings → General → "Allow auto-merge", the labels "auto-merge"
+# and "needs review", and the GitHub App described in MAINTAINERS.md
+# (variable AUTO_MERGE_APP_CLIENT_ID, secret AUTO_MERGE_APP_PRIVATE_KEY).
 
 name: Auto-merge
 
@@ -91,10 +100,27 @@ jobs:
             --owners .github/macro-owners.json \
             --author "$AUTHOR" --draft "$DRAFT"
 
+      - name: Get the auto-merge app's token
+        id: app-token
+        if: steps.decide.outputs.eligible == 'true' && vars.AUTO_MERGE_APP_CLIENT_ID != ''
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.AUTO_MERGE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.AUTO_MERGE_APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+
       - name: Turn on auto-merge
         if: steps.decide.outputs.eligible == 'true'
+        env:
+          MERGE_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
-          gh pr merge "$PR" --auto --merge
+          if [ -n "$MERGE_TOKEN" ]; then
+            GH_TOKEN="$MERGE_TOKEN" gh pr merge "$PR" --auto --merge
+          else
+            echo "::warning::AUTO_MERGE_APP_CLIENT_ID is not set, so auto-merge is turned on with github.token. The merge won't run the Index workflow; run it by hand afterwards (gh workflow run index.yml)."
+            gh pr merge "$PR" --auto --merge
+          fi
           gh pr edit "$PR" --add-label "auto-merge"
           gh pr edit "$PR" --remove-label "needs review" || true
 
