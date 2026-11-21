@@ -22,6 +22,7 @@ src/opensak/macro/metadata.py).
 
 from __future__ import annotations
 
+import json
 import os
 import subprocess
 import sys
@@ -250,6 +251,89 @@ def test_removed_macro_needs_review(repo):
     r = repo.pr({"macros/test-macro/test-macro.lua": None,
                  "macros/test-macro/README.md": None})
     assert r.ok and r.status == "removed" and r.requires_review
+
+
+# --- removals and the owners file ----------------------------------------------
+
+OWNERS = ".github/macro-owners.json"
+
+
+def owners(entries: dict[str, list[str]]) -> str:
+    return json.dumps(entries, indent=2) + "\n"
+
+
+REMOVE = {"macros/test-macro/test-macro.lua": None, "macros/test-macro/README.md": None}
+
+
+def test_removal_with_owner_entry_still_there_fails(repo):
+    repo.merge_to_main(new_macro() | {OWNERS: owners({"test-macro": ["a"], "other": ["b"]})})
+    r = repo.pr(REMOVE)
+    assert r.status == "removed" and not r.ok
+    assert 'Also remove the line for "test-macro" from .github/macro-owners.json' in messages(r)
+
+
+def test_removal_that_removes_its_owner_entry_passes(repo):
+    repo.merge_to_main(new_macro() | {OWNERS: owners({"other": ["b"], "test-macro": ["a"]})})
+    r = repo.pr(REMOVE | {OWNERS: owners({"other": ["b"]})})
+    assert r.ok, messages(r)
+    assert r.status == "removed" and r.requires_review
+    assert any(OWNERS in reason for reason in r.review_reasons)
+
+
+def test_removal_of_last_owner_entry_passes(repo):
+    repo.merge_to_main(new_macro() | {OWNERS: owners({"test-macro": ["a"]})})
+    r = repo.pr(REMOVE | {OWNERS: owners({})})
+    assert r.ok, messages(r)
+
+
+def test_removal_may_not_change_other_owner_entries(repo):
+    repo.merge_to_main(new_macro() | {OWNERS: owners({"other": ["b"], "test-macro": ["a"]})})
+    r = repo.pr(REMOVE | {OWNERS: owners({"other": ["me"]})})
+    assert not r.ok and "this also changes: other" in messages(r)
+    r = repo.pr(REMOVE | {OWNERS: owners({"other": ["b"], "mine": ["me"]})})
+    assert not r.ok and "this also changes: mine" in messages(r)
+
+
+def test_removal_editing_owners_but_keeping_its_entry_fails(repo):
+    repo.merge_to_main(new_macro() | {OWNERS: owners({"other": ["b"], "test-macro": ["a"]})})
+    r = repo.pr(REMOVE | {OWNERS: owners({"test-macro": ["a"]})})
+    assert not r.ok and 'Also remove the line for "test-macro"' in messages(r)
+
+
+def test_removal_without_owner_entry_may_not_touch_owners(repo):
+    repo.merge_to_main(new_macro() | {OWNERS: owners({"other": ["b"]})})
+    assert repo.pr(REMOVE).ok
+    r = repo.pr(REMOVE | {OWNERS: owners({})})
+    assert not r.ok and 'no entry for "test-macro"' in messages(r)
+
+
+def test_removal_with_broken_owners_json_fails(repo):
+    repo.merge_to_main(new_macro() | {OWNERS: owners({"test-macro": ["a"]})})
+    r = repo.pr(REMOVE | {OWNERS: "{\n"})
+    assert not r.ok and "Not valid JSON" in messages(r)
+
+
+def test_removal_ignores_owner_entries_added_to_main_since(repo):
+    repo.merge_to_main(new_macro() | {OWNERS: owners({"test-macro": ["a"]})})
+    repo.git("checkout", "-q", "-b", "removal")
+    repo.write(REMOVE | {OWNERS: owners({})})
+    head = repo.commit("removal")
+    repo.git("checkout", "-q", "main")
+    repo.merge_to_main({OWNERS: owners({"test-macro": ["a"], "newer": ["c"]})})
+    r = cm.check(repo.path, "main", head, MD, LUA)
+    assert r.ok, messages(r)
+
+
+def test_update_may_not_touch_owners(repo):
+    repo.merge_to_main(new_macro() | {OWNERS: owners({"test-macro": ["a"]})})
+    r = repo.pr({"macros/test-macro/README.md": "# Better\n",
+                 OWNERS: owners({"test-macro": ["a", "me"]})})
+    assert "outside its folder" in messages(r)
+
+
+def test_new_macro_may_not_add_its_owner(repo):
+    r = repo.pr(new_macro() | {OWNERS: owners({"test-macro": ["me"]})})
+    assert "outside its folder" in messages(r)
 
 
 def test_version_compares_with_current_main_not_fork_point(repo):

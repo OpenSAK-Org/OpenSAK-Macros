@@ -5,7 +5,9 @@
 # so a macro pull request can't loosen the rules it is checked against.
 # (The pull request can still edit this workflow file itself; that is why
 # auto-merge.yml checks again from main and only ever merges pull requests
-# that change nothing outside their own macro folder.)
+# that change nothing outside their own macro folder. A removal may also
+# remove its own entry from .github/macro-owners.json, but is never
+# auto-merged.)
 #
 # "Test checker" runs the tests with the pull request's version of the
 # scripts, for pull requests that change them.
