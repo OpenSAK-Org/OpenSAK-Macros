@@ -100,7 +100,9 @@ Every pull request is checked automatically. The check fails if:
 - `Network` contains something that isn't a host name, or a blocked host
 - `Version` isn't higher than the version already in the repository
 - a `.lua` file isn't valid Lua 5.4
-- the pull request changes more than one macro folder
+- the pull request changes more than one macro folder, or files outside
+  its macro folder (a removal also removes its owner entry, see
+  [Removing your macro](#removing-your-macro))
 - `Requires-API` is higher than the newest stable OpenSAK release has
   (right now only a warning, until OpenSAK 1.23.0 is released)
 
@@ -128,6 +130,29 @@ change to someone else's macro, is reviewed by a maintainer.
 
 If you want to improve someone else's macro, it's good practice to talk to the
 owner first in an issue or in Discussions.
+
+## Removing your macro
+
+To withdraw a macro, open a pull request that deletes its whole folder
+(`macros/your-macro/`) and, in the same pull request, removes the macro's
+line from `.github/macro-owners.json` — only that line, nothing else in the
+file:
+
+```diff
+ {
+   "another-macro": ["someone"],
+-  "your-macro": ["your-github-login"],
+   "yet-another": ["someone-else"]
+ }
+```
+
+If the line is still there, the check fails with `Also remove the line for
+"your-macro" from .github/macro-owners.json.` If the macro has no entry there,
+leave the file alone.
+
+A removal is always reviewed by a maintainer: once it is merged, OpenSAK
+shows the macro as withdrawn to everyone who has it installed. Say in the
+pull request why you are removing it.
 
 ## Porting a GSAK macro
 

@@ -48,6 +48,25 @@ entry.
 
 To hand a macro over to someone else, change its entry.
 
+## Reviewing a removal
+
+A pull request that deletes a macro folder is always left for review. Once
+merged, the macro moves to `withdrawn[]` in `index.json` (see
+[The macro index](#the-macro-index)), and OpenSAK shows it as withdrawn to
+everyone who has it installed.
+
+- Is it the owner (or a maintainer) removing it, and does the pull request
+  say why? If someone else wants a macro gone, talk to the owner first.
+- The whole folder goes: a pull request that leaves some files behind is
+  an update, not a removal.
+- The checker requires the macro's line in `.github/macro-owners.json` to be
+  removed in the same pull request, and nothing else in that file to change;
+  its summary says "Its entry in .github/macro-owners.json is removed too".
+  A macro without an owner entry is removed without touching the file.
+
+Merge with **Create a merge commit**, then check after the Index run that
+the macro is listed under `withdrawn` in `index.json`.
+
 ## Reviewing an update that declares more
 
 The checker's summary lists what is new (e.g. `write` or
