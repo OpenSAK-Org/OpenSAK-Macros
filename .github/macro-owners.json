@@ -1,9 +1,8 @@
 {
   "filter-available-and-solved": ["dstein766"],
   "fix-owner-ids": ["ianwok"],
-  "gdak-export": ["nagisml"],
   "gcdroid-export": ["nagisml"],
-  "new-since-last-run": ["nagisml"],
+  "gdak-export": ["nagisml"],
   "optimize-pqs": ["dstein766"],
   "roadsheet": ["dstein766"]
 }
