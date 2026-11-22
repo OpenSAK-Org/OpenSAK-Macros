@@ -14,7 +14,8 @@ eligible only if all of these hold:
   - it is not a draft
 
 The checker already makes sure the pull request changes nothing outside the
-macro folder. The owners file is read from main, so a pull request can't
+macro folder (a removal may also remove its owner entry, but removals are
+never eligible). The owners file is read from main, so a pull request can't
 make its author an owner.
 
 Prints the decision, writes it to the job summary, and sets

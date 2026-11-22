@@ -14,6 +14,9 @@ lupa, ...). The workflow downloads it from a pinned OpenSAK commit.
 Rules (see CONTRIBUTING.md):
   - only one folder under macros/ may change, and a pull request that
     changes a macro folder may not change anything else
+  - except: a pull request that removes a macro also removes the macro's
+    entry from .github/macro-owners.json, and nothing else in that file
+    (it fails while the entry is still there)
   - folder name: lowercase letters, digits and hyphens; the folder holds
     <folder>.lua and README.md
   - header: Name, Author, Version, Description, Requires-API and
@@ -58,6 +61,7 @@ from types import ModuleType
 from typing import Callable
 
 MACROS_DIR = "macros"
+OWNERS_FILE = ".github/macro-owners.json"
 FOLDER_NAME = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 VERSION = re.compile(r"^\d+(?:\.\d+)*$")
 REQUIRED_KEYS = ("name", "author", "version", "description", "requires-api",
@@ -129,6 +133,11 @@ class Git:
         out = self._run("diff", "--name-only", "--no-renames", "-z",
                         f"{base}...{head}").stdout
         return [p for p in out.decode("utf-8").split("\0") if p]
+
+    def merge_base(self, base: str, head: str) -> str:
+        """The commit the pull request's changes are measured from (what
+        changed_paths() diffs against)."""
+        return self._run("merge-base", base, head).stdout.decode().strip()
 
     def files_in(self, rev: str, folder: str) -> list[str]:
         out = self._run("ls-tree", "-r", "-z", "--name-only", rev, "--",
@@ -330,6 +339,61 @@ def check_header(md: ModuleType, text: str, path: str, result: Result):
     return info
 
 
+def read_owners(git: Git, rev: str, result: Result) -> dict | None:
+    """.github/macro-owners.json at *rev* as a dict ({} when the file isn't
+    there), or None (with an error) when it isn't a JSON object."""
+    data = git.read(rev, OWNERS_FILE)
+    if data is None:
+        return {}
+    try:
+        owners = json.loads(data.decode("utf-8"))
+    except (UnicodeDecodeError, ValueError) as exc:
+        result.error(f"Not valid JSON: {exc}.", OWNERS_FILE)
+        return None
+    if not isinstance(owners, dict):
+        result.error("Must be a JSON object.", OWNERS_FILE)
+        return None
+    return owners
+
+
+def check_owner_entry(git: Git, base: str, head: str, name: str,
+                      owners_changed: bool, result: Result) -> None:
+    """A pull request that removes macros/<name>/ must also remove the
+    "<name>" entry from the owners file, and change nothing else in it.
+    Its change is measured from the merge base, like changed_paths(), so
+    entries added to main since the pull request branched off don't count;
+    without a change, the entry must not be on *base* (main)."""
+    fix = f"Also remove the line for \"{name}\" from {OWNERS_FILE}."
+    if not owners_changed:
+        owners = read_owners(git, base, result)
+        if owners is not None and name in owners:
+            result.error(f"{MACROS_DIR}/{name} is removed, but {OWNERS_FILE} "
+                         f"still has an entry for it. {fix}", OWNERS_FILE)
+        return
+
+    before = read_owners(git, git.merge_base(base, head), result)
+    after = read_owners(git, head, result)
+    if before is None or after is None:
+        return
+    if name not in before:
+        result.error(f"{OWNERS_FILE} has no entry for \"{name}\" to remove; a "
+                     "pull request that removes a macro may change that file "
+                     "only to remove the macro's own entry.", OWNERS_FILE)
+        return
+    expected = {k: v for k, v in before.items() if k != name}
+    if after != expected:
+        changed = sorted(k for k in set(before) | set(after)
+                         if k != name and before.get(k) != after.get(k))
+        if name in after:
+            message = f"The entry for \"{name}\" is still there. {fix}"
+        else:
+            message = "Only the line for \"" + name + "\" may be removed; " \
+                      "this also changes: " + ", ".join(changed) + "."
+        result.error(message, OWNERS_FILE)
+        return
+    result.review_reasons.append(f"Its entry in {OWNERS_FILE} is removed too.")
+
+
 def check(repo: Path, base: str, head: str, md: ModuleType,
           lua: LuaChecker | None = None, stable: Stable | None = None,
           stable_mode: str = "off") -> Result:
@@ -357,10 +421,6 @@ def check(repo: Path, base: str, head: str, md: ModuleType,
                      "changes " + ", ".join(f"macros/{f}" for f in sorted(folders))
                      + ". Please open one pull request per macro.")
         return result
-    if other:
-        result.error("A pull request that changes a macro may not change files "
-                     "outside its folder: " + ", ".join(sorted(other)) + ".")
-
     name, folder_changes = next(iter(folders.items()))
     folder = f"{MACROS_DIR}/{name}"
     result.folder = folder
@@ -368,10 +428,20 @@ def check(repo: Path, base: str, head: str, md: ModuleType,
 
     head_files = git.files_in(head, folder)
     base_files = git.files_in(base, folder)
+    removed = not head_files
 
-    if not head_files:
+    # A removal may (and must) also remove the macro's owner entry
+    owners_changed = removed and OWNERS_FILE in other
+    if owners_changed:
+        other.remove(OWNERS_FILE)
+    if other:
+        result.error("A pull request that changes a macro may not change files "
+                     "outside its folder: " + ", ".join(sorted(other)) + ".")
+
+    if removed:
         result.status = "removed"
         result.review_reasons.append("The macro is removed.")
+        check_owner_entry(git, base, head, name, owners_changed, result)
         return result
 
     result.status = "update" if base_files else "new"
