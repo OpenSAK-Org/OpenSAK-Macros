@@ -324,6 +324,48 @@ def test_removal_ignores_owner_entries_added_to_main_since(repo):
     assert r.ok, messages(r)
 
 
+def removal_branch_then_owner_added_to_main(repo, files):
+    """A removal branched off main before the macro's owner line was added
+    to main (as maintainers do after merging a new macro)."""
+    repo.merge_to_main(new_macro() | {OWNERS: owners({"other": ["b"]})})
+    repo.git("checkout", "-q", "-b", "removal")
+    repo.write(REMOVE | files)
+    head = repo.commit("removal")
+    repo.git("checkout", "-q", "main")
+    repo.merge_to_main({OWNERS: owners({"other": ["b"], "test-macro": ["a"]})})
+    return cm.check(repo.path, "main", head, MD, LUA)
+
+
+def test_removal_of_entry_added_to_main_since_says_update_branch(repo):
+    r = removal_branch_then_owner_added_to_main(repo, {})
+    assert not r.ok
+    assert "Update the branch from main first" in messages(r)
+    assert "Also remove the line" not in messages(r)
+
+
+def test_removal_touching_owners_with_entry_added_to_main_since(repo):
+    r = removal_branch_then_owner_added_to_main(
+        repo, {OWNERS: owners({"other": ["b"], "mine": ["me"]})})
+    assert not r.ok
+    assert "Update the branch from main first" in messages(r)
+
+
+def test_removal_after_updating_branch_from_main_passes(repo):
+    repo.merge_to_main(new_macro() | {OWNERS: owners({"other": ["b"]})})
+    repo.git("checkout", "-q", "-b", "removal")
+    repo.write(REMOVE)
+    repo.commit("removal")
+    repo.git("checkout", "-q", "main")
+    repo.merge_to_main({OWNERS: owners({"other": ["b"], "test-macro": ["a"]})})
+    repo.git("checkout", "-q", "removal")
+    repo.git("merge", "-q", "--no-edit", "main")
+    repo.write({OWNERS: owners({"other": ["b"]})})
+    head = repo.commit("remove owner line")
+    repo.git("checkout", "-q", "main")
+    r = cm.check(repo.path, "main", head, MD, LUA)
+    assert r.ok, messages(r)
+
+
 def test_update_may_not_touch_owners(repo):
     repo.merge_to_main(new_macro() | {OWNERS: owners({"test-macro": ["a"]})})
     r = repo.pr({"macros/test-macro/README.md": "# Better\n",

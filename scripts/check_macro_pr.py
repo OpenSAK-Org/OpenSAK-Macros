@@ -362,20 +362,39 @@ def check_owner_entry(git: Git, base: str, head: str, name: str,
     "<name>" entry from the owners file, and change nothing else in it.
     Its change is measured from the merge base, like changed_paths(), so
     entries added to main since the pull request branched off don't count;
-    without a change, the entry must not be on *base* (main)."""
+    without a change, the entry must not be on *base* (main).
+
+    An entry added to main after the branch was made (owner lines are added
+    in a separate commit after a new macro is merged) isn't in the
+    contributor's copy of the file, so they are told to update the branch
+    from main first and then remove the line."""
     fix = f"Also remove the line for \"{name}\" from {OWNERS_FILE}."
+    update_first = (f"The entry for \"{name}\" was added to main after this "
+                    "branch was created, so it isn't in your copy of the file. "
+                    "Update the branch from main first (e.g. with the \"Update "
+                    "branch\" button on the pull request), then remove the line "
+                    f"for \"{name}\" from {OWNERS_FILE}.")
+    fork_point = git.merge_base(base, head)
     if not owners_changed:
         owners = read_owners(git, base, result)
         if owners is not None and name in owners:
+            at_fork = read_owners(git, fork_point, Result())
+            hint = fix if at_fork is None or name in at_fork else update_first
             result.error(f"{MACROS_DIR}/{name} is removed, but {OWNERS_FILE} "
-                         f"still has an entry for it. {fix}", OWNERS_FILE)
+                         f"still has an entry for it. {hint}", OWNERS_FILE)
         return
 
-    before = read_owners(git, git.merge_base(base, head), result)
+    before = read_owners(git, fork_point, result)
     after = read_owners(git, head, result)
     if before is None or after is None:
         return
     if name not in before:
+        on_main = read_owners(git, base, Result())
+        if on_main is not None and name in on_main:
+            result.error(f"{MACROS_DIR}/{name} is removed, but {OWNERS_FILE} "
+                         f"on main still has an entry for it. {update_first}",
+                         OWNERS_FILE)
+            return
         result.error(f"{OWNERS_FILE} has no entry for \"{name}\" to remove; a "
                      "pull request that removes a macro may change that file "
                      "only to remove the macro's own entry.", OWNERS_FILE)
