@@ -1,13 +1,13 @@
 # set-owner-id
 
 Sets the Owner ID field of caches, where it is currently null or zero.
-The Owner Name and associated Owner Name is manually input by a form.
+The Owner Name and associated Owner ID is manually input by a form.
 Normally used to set up OwnerID of lab caches imported from lab2gpx, where then
 OwnerID information is not provided within the .gpx file.
 
 Where possible the macro fix-owner-ids should be used to set the OwnerID field
 (this works by copying the OwnerID from non-lab caches in the OpenSAK databases, where
-this field is already populated). This macro fix-owner-id can then be used for
+this field is already populated). This macro set-owner-id can then be used for
 those lab caches where there are no other caches for that same owner and with a
 defined OwnerID. 
 
