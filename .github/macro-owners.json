@@ -4,5 +4,6 @@
   "gcdroid-export": ["nagisml"],
   "gdak-export": ["nagisml"],
   "optimize-pqs": ["dstein766"],
-  "roadsheet": ["dstein766"]
+  "roadsheet": ["dstein766"],
+  "set-owner-id": ["ianwok"]
 }
