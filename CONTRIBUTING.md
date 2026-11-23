@@ -150,6 +150,10 @@ If the line is still there, the check fails with `Also remove the line for
 "your-macro" from .github/macro-owners.json.` If the macro has no entry there,
 leave the file alone.
 
+If the check says the entry was added to main after your branch was created,
+your copy of the file doesn't have the line yet: update the branch from main
+first (the "Update branch" button on the pull request), then remove the line.
+
 A removal is always reviewed by a maintainer: once it is merged, OpenSAK
 shows the macro as withdrawn to everyone who has it installed. Say in the
 pull request why you are removing it.
