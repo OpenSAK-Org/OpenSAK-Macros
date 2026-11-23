@@ -44,8 +44,13 @@ if not values then return end  -- cancelled
 -- Trim and check inputs
 local name = (values.ownerName or ""):match("^%s*(.-)%s*$")
 local id = (values.ownerID or ""):match("^%s*(.-)%s*$")
+if name == "" then
+    opensak.message("Please enter Owner Name", "set-owner-id")
+    return
+end
 if not id:match("^%d+$") then
     opensak.message("Owner ID must be a number", "set-owner-id")
+    return
 end 
 --
 -- Build SQL string to update owner_id for all rows with this owner_name where owner_id is not set
