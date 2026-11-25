@@ -1,9 +1,63 @@
 {
   "schema": 1,
   "repository": "https://github.com/OpenSAK-Org/OpenSAK-Macros",
-  "commit": "5bb1e2e7d759190568a2e62a9bbab4625d82cc75",
-  "generated": "2026-11-23T12:24:37Z",
+  "commit": "c25531934258fa9d051aee53fd6344fe3e170d60",
+  "generated": "2026-11-25T14:56:08Z",
   "macros": [
+    {
+      "id": "check-user-sort-incremental",
+      "folder": "macros/check-user-sort-incremental",
+      "name": "check-user-sort-incremental",
+      "author": "Ian Cole",
+      "version": "1.0",
+      "description": "Checks that user_sort field is sequential starting at 1",
+      "requires_api": 3,
+      "permissions": [
+        "none"
+      ],
+      "network": [],
+      "headless": null,
+      "file": "macros/check-user-sort-incremental/check-user-sort-incremental.lua",
+      "readme": "macros/check-user-sort-incremental/README.md",
+      "page": "https://github.com/OpenSAK-Org/OpenSAK-Macros/tree/main/macros/check-user-sort-incremental",
+      "files": [
+        {
+          "path": "macros/check-user-sort-incremental/README.md",
+          "size": 1350,
+          "sha256": "b30575a78c8d1f45cde73557f1e40e2fbffbbbfa13a83aa2adedbdd5dfe8f2ed",
+          "url": "https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK-Macros/c25531934258fa9d051aee53fd6344fe3e170d60/macros/check-user-sort-incremental/README.md"
+        },
+        {
+          "path": "macros/check-user-sort-incremental/check-user-sort-incremental.lua",
+          "size": 1039,
+          "sha256": "7991212d2cf24051df6585da53b9e59b709e9e8414f10f04138eba3fba7558d2",
+          "url": "https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK-Macros/c25531934258fa9d051aee53fd6344fe3e170d60/macros/check-user-sort-incremental/check-user-sort-incremental.lua"
+        }
+      ],
+      "versions": [
+        {
+          "version": "1.0",
+          "published": "2026-11-25T14:56:08Z",
+          "commit": "c25531934258fa9d051aee53fd6344fe3e170d60",
+          "requires_api": 3,
+          "permissions": [
+            "none"
+          ],
+          "network": [],
+          "size": 1039,
+          "sha256": "7991212d2cf24051df6585da53b9e59b709e9e8414f10f04138eba3fba7558d2",
+          "url": "https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK-Macros/c25531934258fa9d051aee53fd6344fe3e170d60/macros/check-user-sort-incremental/check-user-sort-incremental.lua"
+        }
+      ],
+      "published": "2026-11-25T14:56:08Z",
+      "updated": "2026-11-25T14:56:08Z",
+      "changelog": [
+        {
+          "version": "1.0",
+          "text": "first version"
+        }
+      ]
+    },
     {
       "id": "filter-available-and-solved",
       "folder": "macros/filter-available-and-solved",
@@ -25,13 +79,13 @@
           "path": "macros/filter-available-and-solved/README.md",
           "size": 800,
           "sha256": "51c9cd6d2ea7a95eb31bcb5c5436e2a126d62384f49892f440b2988022d60c40",
-          "url": "https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK-Macros/5bb1e2e7d759190568a2e62a9bbab4625d82cc75/macros/filter-available-and-solved/README.md"
+          "url": "https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK-Macros/c25531934258fa9d051aee53fd6344fe3e170d60/macros/filter-available-and-solved/README.md"
         },
         {
           "path": "macros/filter-available-and-solved/filter-available-and-solved.lua",
           "size": 1085,
           "sha256": "9f8c3afe01ae636625f5ff0a602a93d8b8aa2adc70c3797b1ad8169d9b5978c2",
-          "url": "https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK-Macros/5bb1e2e7d759190568a2e62a9bbab4625d82cc75/macros/filter-available-and-solved/filter-available-and-solved.lua"
+          "url": "https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK-Macros/c25531934258fa9d051aee53fd6344fe3e170d60/macros/filter-available-and-solved/filter-available-and-solved.lua"
         }
       ],
       "versions": [
@@ -96,13 +150,13 @@
           "path": "macros/fix-owner-ids/README.md",
           "size": 1536,
           "sha256": "38ea66d99e66d2fbbb756f49b470e21e583c82567f09a5c2141a04a93752721d",
-          "url": "https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK-Macros/5bb1e2e7d759190568a2e62a9bbab4625d82cc75/macros/fix-owner-ids/README.md"
+          "url": "https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK-Macros/c25531934258fa9d051aee53fd6344fe3e170d60/macros/fix-owner-ids/README.md"
         },
         {
           "path": "macros/fix-owner-ids/fix-owner-ids.lua",
           "size": 2592,
           "sha256": "baab158c8253fc4a17f0fec03dbb460905dadfe5317da9eb30cacbb8ac5d2a3b",
-          "url": "https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK-Macros/5bb1e2e7d759190568a2e62a9bbab4625d82cc75/macros/fix-owner-ids/fix-owner-ids.lua"
+          "url": "https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK-Macros/c25531934258fa9d051aee53fd6344fe3e170d60/macros/fix-owner-ids/fix-owner-ids.lua"
         }
       ],
       "versions": [
@@ -162,13 +216,13 @@
           "path": "macros/gcdroid-export/README.md",
           "size": 3780,
           "sha256": "4221085fd3010a6dd9cf00d0001c3d14cd427495e7d6ac46b3f401cb4dd0fa82",
-          "url": "https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK-Macros/5bb1e2e7d759190568a2e62a9bbab4625d82cc75/macros/gcdroid-export/README.md"
+          "url": "https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK-Macros/c25531934258fa9d051aee53fd6344fe3e170d60/macros/gcdroid-export/README.md"
         },
         {
           "path": "macros/gcdroid-export/gcdroid-export.lua",
           "size": 23458,
           "sha256": "2a0f03c04db24d70ac4a060e11a904d1664f7172ea4bc80d1d6a7b8b86608937",
-          "url": "https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK-Macros/5bb1e2e7d759190568a2e62a9bbab4625d82cc75/macros/gcdroid-export/gcdroid-export.lua"
+          "url": "https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK-Macros/c25531934258fa9d051aee53fd6344fe3e170d60/macros/gcdroid-export/gcdroid-export.lua"
         }
       ],
       "versions": [
@@ -216,13 +270,13 @@
           "path": "macros/gdak-export/README.md",
           "size": 4503,
           "sha256": "06ba103d8e5f247938703743ffc1ff4a64197893103690b0688fcc306ee922e0",
-          "url": "https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK-Macros/5bb1e2e7d759190568a2e62a9bbab4625d82cc75/macros/gdak-export/README.md"
+          "url": "https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK-Macros/c25531934258fa9d051aee53fd6344fe3e170d60/macros/gdak-export/README.md"
         },
         {
           "path": "macros/gdak-export/gdak-export.lua",
           "size": 24144,
           "sha256": "900ef58eace492769f8c9b9871acab824ee37eb21e83e6e8dea8388e09a76172",
-          "url": "https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK-Macros/5bb1e2e7d759190568a2e62a9bbab4625d82cc75/macros/gdak-export/gdak-export.lua"
+          "url": "https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK-Macros/c25531934258fa9d051aee53fd6344fe3e170d60/macros/gdak-export/gdak-export.lua"
         }
       ],
       "versions": [
@@ -270,19 +324,19 @@
           "path": "macros/optimize-pqs/README.md",
           "size": 1244,
           "sha256": "6c3d08d66c867a9bb9c8afc7ad9367d40cbd39d59cbc548797cf74679ead37f2",
-          "url": "https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK-Macros/5bb1e2e7d759190568a2e62a9bbab4625d82cc75/macros/optimize-pqs/README.md"
+          "url": "https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK-Macros/c25531934258fa9d051aee53fd6344fe3e170d60/macros/optimize-pqs/README.md"
         },
         {
           "path": "macros/optimize-pqs/optimize-pqs.lua",
           "size": 7569,
           "sha256": "71fc658ffdc2bf196b18e389f53ccb339d3bb8d39152ce9ba81994e59a846660",
-          "url": "https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK-Macros/5bb1e2e7d759190568a2e62a9bbab4625d82cc75/macros/optimize-pqs/optimize-pqs.lua"
+          "url": "https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK-Macros/c25531934258fa9d051aee53fd6344fe3e170d60/macros/optimize-pqs/optimize-pqs.lua"
         },
         {
           "path": "macros/optimize-pqs/screenshots/OptimizePQs.png",
           "size": 115454,
           "sha256": "4bae1fecfa08ff4a531146fd639c62f49ebfdfb2fab13ec3d24be974d0496e4c",
-          "url": "https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK-Macros/5bb1e2e7d759190568a2e62a9bbab4625d82cc75/macros/optimize-pqs/screenshots/OptimizePQs.png"
+          "url": "https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK-Macros/c25531934258fa9d051aee53fd6344fe3e170d60/macros/optimize-pqs/screenshots/OptimizePQs.png"
         }
       ],
       "versions": [
@@ -334,19 +388,19 @@
           "path": "macros/roadsheet/README.md",
           "size": 657,
           "sha256": "19c159772fac69538d6419ad30a70d18d39146fc9369d9196df4eb0c9a916483",
-          "url": "https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK-Macros/5bb1e2e7d759190568a2e62a9bbab4625d82cc75/macros/roadsheet/README.md"
+          "url": "https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK-Macros/c25531934258fa9d051aee53fd6344fe3e170d60/macros/roadsheet/README.md"
         },
         {
           "path": "macros/roadsheet/examples/roadsheet-example.png",
           "size": 41204,
           "sha256": "606d642dee9c27830f60814c76d1888ed36bb43a411b01627e3a67c86ad4cedd",
-          "url": "https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK-Macros/5bb1e2e7d759190568a2e62a9bbab4625d82cc75/macros/roadsheet/examples/roadsheet-example.png"
+          "url": "https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK-Macros/c25531934258fa9d051aee53fd6344fe3e170d60/macros/roadsheet/examples/roadsheet-example.png"
         },
         {
           "path": "macros/roadsheet/roadsheet.lua",
           "size": 12659,
           "sha256": "5cfe2f493afb142900edf4069ddea0f53fd06da32234bb3a96f10ff139661aa8",
-          "url": "https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK-Macros/5bb1e2e7d759190568a2e62a9bbab4625d82cc75/macros/roadsheet/roadsheet.lua"
+          "url": "https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK-Macros/c25531934258fa9d051aee53fd6344fe3e170d60/macros/roadsheet/roadsheet.lua"
         }
       ],
       "versions": [
@@ -394,13 +448,13 @@
           "path": "macros/set-owner-id/README.md",
           "size": 1553,
           "sha256": "ea3059b6057047deb9a8f8d6e2c5271bb760ebcb09dde45bec0ca746c6c222b1",
-          "url": "https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK-Macros/5bb1e2e7d759190568a2e62a9bbab4625d82cc75/macros/set-owner-id/README.md"
+          "url": "https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK-Macros/c25531934258fa9d051aee53fd6344fe3e170d60/macros/set-owner-id/README.md"
         },
         {
           "path": "macros/set-owner-id/set-owner-id.lua",
           "size": 2448,
           "sha256": "f5072a4416840d72b4ed6e831837e146be0be85dc75f688b9de29c95961b8457",
-          "url": "https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK-Macros/5bb1e2e7d759190568a2e62a9bbab4625d82cc75/macros/set-owner-id/set-owner-id.lua"
+          "url": "https://raw.githubusercontent.com/OpenSAK-Org/OpenSAK-Macros/c25531934258fa9d051aee53fd6344fe3e170d60/macros/set-owner-id/set-owner-id.lua"
         }
       ],
       "versions": [
