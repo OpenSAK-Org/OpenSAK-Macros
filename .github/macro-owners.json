@@ -1,4 +1,5 @@
 {
+  "check-user-sort-incremental": ["ianwok"],
   "filter-available-and-solved": ["dstein766"],
   "fix-owner-ids": ["ianwok"],
   "gcdroid-export": ["nagisml"],
