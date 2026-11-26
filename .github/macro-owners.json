@@ -7,5 +7,6 @@
   "optimize-pqs": ["dstein766"],
   "roadsheet": ["dstein766"],
   "set-owner-id": ["ianwok"],
+  "update-elevation-current": ["AgreeDK"], 
   "update-location-current": ["AgreeDK"]
 }
