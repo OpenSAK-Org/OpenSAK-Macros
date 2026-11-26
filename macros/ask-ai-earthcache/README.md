@@ -44,7 +44,7 @@ the page and can be edited in the chat before sending.
    **Shift** when you start the macro to change your choice later.
 4. The prompt is put on the clipboard and a page opens in your browser.
    Press **Open …** to go to the AI chat.
-5. For Claude and ChatGPT the chat usually opens with the prompt filled in.
+5. For Claude, ChatGPT and Le Chat the chat usually opens with the prompt filled in.
    Otherwise — or if the listing is too long to fit in a link — paste the
    prompt with **Ctrl+V** (**Cmd+V** on a Mac).
 
@@ -57,7 +57,7 @@ you can save one and drag it into the chat when it matters.
 |---|---|---|
 | Claude | `https://claude.ai/new` | yes (`?q=`) |
 | ChatGPT | `https://chatgpt.com/` | yes (`?q=`) |
-| Le Chat (Mistral) | `https://chat.mistral.ai/chat` | no — paste it |
+| Le Chat (Mistral) | `https://chat.mistral.ai/chat` | yes (`?q=`) |
 | Other (my own URL) | the URL you enter | only if the URL contains `{prompt}` |
 
 With **Other**, enter the address of any AI chat. If it can take the prompt
@@ -83,4 +83,5 @@ At the top of the macro file:
 
 ## Changes
 
+- 0.2 — Le Chat (Mistral) now opens with the prompt filled in; a too-long prompt no longer leaves `{prompt}` in an "Other" URL
 - 0.1 — first version

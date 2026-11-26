@@ -1,7 +1,7 @@
 -- OpenSAK Macro
 -- Name: Ask AI about an earthcache
 -- Author: AgreeDK
--- Version: 0.1
+-- Version: 0.2
 -- Requires-API: 5
 -- Description: Turns the selected earthcache's listing into a prompt for an AI chat (Claude, ChatGPT, Le Chat or your own) that explains it in your language
 -- Permissions: open
@@ -37,7 +37,7 @@
 local AIS = {
     { name = "Claude",           url = "https://claude.ai/new",        prefill = true },
     { name = "ChatGPT",          url = "https://chatgpt.com/",         prefill = true },
-    { name = "Le Chat (Mistral)", url = "https://chat.mistral.ai/chat", prefill = false },
+    { name = "Le Chat (Mistral)", url = "https://chat.mistral.ai/chat", prefill = true },
 }
 local OTHER = "Other (my own URL)"
 
@@ -296,9 +296,9 @@ elseif ai.prefill then
 end
 if with_prompt and #with_prompt <= MAX_LINK_CHARS then
     link, prefilled = with_prompt, true
-elseif with_prompt then
+elseif ai.url:find("{prompt}", 1, true) then
     -- too long: open the chat without the prompt
-    link = ai.url:gsub("[?&][^?&]*{prompt}.*$", "")
+    link = ai.url:gsub("[?&][^?&]*{prompt}.*$", ""):gsub("{prompt}", "")
 end
 
 local body = {}
